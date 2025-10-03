@@ -25,6 +25,26 @@ class PTextStyles {
     fontWeight: FontWeight.w500,
   );
   
+    static TextStyle get headlineMedium => getTextStyle(
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    color: PColors.white,
+  );
+     static TextStyle get labelMedium => getTextStyle(
+    fontWeight: FontWeight.w400,
+    fontSize: 12,
+    color: PColors.white,
+  );
+      static TextStyle get labelSmall => getTextStyle(
+    fontWeight: FontWeight.w400,
+    fontSize: 13,
+    color: PColors.black,
+  );
+     static TextStyle get labelLarge => getTextStyle(
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    color: PColors.white,
+  );
   // static TextStyle get displaySmall =>
   //     getTextComfortaa(fontSize: 18, fontWeight: FontWeight.bold);
   // static TextStyle get labelMedium => getTextStyle(

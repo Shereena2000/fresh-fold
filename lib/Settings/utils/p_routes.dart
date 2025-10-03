@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-
-
 import '../../Features/auth/mobile_num_verification/view/ui.dart';
 import '../../Features/auth/otp_verification/view/ui.dart';
 import '../../Features/auth/registration/view/ui.dart';
-import '../../Features/wrapper_screen/view/ui.dart';
 import '../../Features/on_boarding/view/ui.dart';
+import '../../Features/profile/view/ui.dart';
+import '../../Features/shedule_plan/view/ui.dart';
 import '../../Features/splash/view/splash_screen.dart';
+import '../../Features/wrapper/view/ui.dart';
 import 'p_pages.dart';
 
 class Routes {
@@ -27,7 +27,10 @@ class Routes {
         return MaterialPageRoute(builder: (context) => RegistrationScreen());
       case PPages.wrapperPageUi:
         return MaterialPageRoute(builder: (context) => WrapperScreen());
-
+      case PPages.schedulePageUi:
+        return MaterialPageRoute(builder: (context) => ScheduleWashScreen());
+      case PPages.profilePageUi:
+        return MaterialPageRoute(builder: (context) => ProfileScreen());
 
 
       default:

@@ -5,7 +5,7 @@ class PColors {
   static Color get colorFFFFFF => Color(0xffFFFFFF);
   static Color get color000000 => Color(0xff000000);
   static Color get scaffoldColor => Color(0xffFFFFFF);
-
+ static Color get scaffoldColor2 =>  Color(0xFFFDE5B7);
 
   // Project needs
   
