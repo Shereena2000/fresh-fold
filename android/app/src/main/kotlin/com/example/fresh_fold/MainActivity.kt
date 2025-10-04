@@ -1,4 +1,4 @@
-package com.example.fresh_fold
+package com.earningfish.freshfold
 
 import io.flutter.embedding.android.FlutterActivity
 
