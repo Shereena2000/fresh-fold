@@ -9,7 +9,6 @@ import '../../../Settings/common/widgets/custom_elevated_button.dart';
 import '../../../Settings/common/widgets/custom_text_feild.dart';
 import '../view_model.dart/auth_view_model.dart';
 
-
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -17,7 +16,8 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child:    SingleChildScrollView( // Wrap with SingleChildScrollView
+        child: SingleChildScrollView(
+          // Wrap with SingleChildScrollView
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: MediaQuery.of(context).size.height,
@@ -28,9 +28,8 @@ class LoginScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                
-             HeadingSection(title: "Welcome Back !"),
-               
+                  HeadingSection(title: "Welcome Back !"),
+
                   SizeBoxH(20),
 
                   Consumer<AuthViewModel>(
@@ -44,7 +43,7 @@ class LoginScreen extends StatelessWidget {
                             keyboardType: TextInputType.emailAddress,
                           ),
                           SizeBoxH(12),
-                          
+
                           // Password Field
                           CustomTextFeild(
                             controller: provider.passwordController,
@@ -53,15 +52,13 @@ class LoginScreen extends StatelessWidget {
                             suffixIcon: IconButton(
                               onPressed: provider.togglePasswordVisibility,
                               icon: Icon(
-                                provider.isPasswordVisible 
-                                    ? Icons.visibility_off 
+                                provider.isPasswordVisible
+                                    ? Icons.visibility_off
                                     : Icons.visibility,
                                 color: PColors.black,
                               ),
                             ),
-                            sufixfn: () {
-                              
-                            },
+                            sufixfn: () {},
                           ),
 
                           // Error Message
@@ -73,46 +70,53 @@ class LoginScreen extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Colors.red.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                border: Border.all(
+                                  color: Colors.red.withOpacity(0.3),
+                                ),
                               ),
                               child: Text(
                                 provider.error!,
-                                style: TextStyle(color: Colors.red, fontSize: 14),
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
                           ],
 
                           SizeBoxH(20),
-                          
+
                           // Sign In Button
                           CustomElavatedTextButton(
-                            text: provider.isLoading ? "Signing In..." : "Sign In",
-                            onPressed: provider.isLoading 
+                            text: provider.isLoading
+                                ? "Signing In..."
+                                : "Sign In",
+                            onPressed: provider.isLoading
                                 ? null // Use null instead of empty function
                                 : () async {
                                     final success = await provider.signIn();
                                     if (success && context.mounted) {
-                                      final status = await provider.checkAuthStatus();
-                                      if (status == 'registration'){
-                                          Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        PPages.registrationPageUi,
-                                        (route) => false,
-                                      );
-                                      }else{
-                                            Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        PPages.wrapperPageUi,
-                                        (route) => false,
-                                      );
+                                      final status = await provider
+                                          .checkAuthStatus();
+                                      if (status == 'registration') {
+                                        Navigator.pushNamedAndRemoveUntil(
+                                          context,
+                                          PPages.registrationPageUi,
+                                          (route) => false,
+                                        );
+                                      } else {
+                                        Navigator.pushNamedAndRemoveUntil(
+                                          context,
+                                          PPages.wrapperPageUi,
+                                          (route) => false,
+                                        );
                                       }
-                                    
                                     }
                                   },
                           ),
-                          
+
                           SizeBoxH(12),
-                          
+
                           // Sign Up Navigation
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -127,8 +131,12 @@ class LoginScreen extends StatelessWidget {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  provider.clearError();
-                                  Navigator.pushReplacementNamed(context, PPages.signUp);
+                                   provider.clearError();
+        provider.clearLoginData(); 
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    PPages.signUp,
+                                  );
                                 },
                                 child: Text(
                                   "Sign Up",
@@ -141,12 +149,13 @@ class LoginScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          
+
                           SizeBoxH(20),
-                          
+
                           // Forgot Password
                           GestureDetector(
-                            onTap: () => _showForgotPasswordDialog(context, provider),
+                            onTap: () =>
+                                _showForgotPasswordDialog(context, provider),
                             child: Text(
                               "Forgot Password?",
                               style: getTextStyle(
@@ -171,13 +180,15 @@ class LoginScreen extends StatelessWidget {
 
   void _showForgotPasswordDialog(BuildContext context, AuthViewModel provider) {
     final emailController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: PColors.darkGray,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: Text("Reset Password", style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -202,9 +213,11 @@ class LoginScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final success = await provider.sendPasswordResetEmail(emailController.text);
+                final success = await provider.sendPasswordResetEmail(
+                  emailController.text,
+                );
                 Navigator.pop(context);
-                
+
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -221,8 +234,13 @@ class LoginScreen extends StatelessWidget {
                   );
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: PColors.primaryColor),
-              child: Text("Send Reset Link", style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: PColors.primaryColor,
+              ),
+              child: Text(
+                "Send Reset Link",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );

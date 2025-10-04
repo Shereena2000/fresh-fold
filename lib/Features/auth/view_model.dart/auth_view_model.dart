@@ -511,34 +511,14 @@ class AuthViewModel extends ChangeNotifier {
     return 'wrapper';
   }
 
-  Future<void> signOut() async {
-    await _repository.signOut();
-    _currentUser = null;
-    clearData();
-    notifyListeners();
-  }
+
 
   void clearError() {
     _errorMessage = null;
     notifyListeners();
   }
 
-  void clearData() {
-    phoneController.clear();
-    fullNameController.clear();
-    emailController.clear();
-    locationController.clear();
-    usernameController.clear();
-    passwordController.clear();
-    confirmPasswordController.clear();
-    for (var controller in otpControllers) {
-      controller.clear();
-    }
-    _phoneAuthModel = null;
-    _errorMessage = null;
-    _timer?.cancel();
-    notifyListeners();
-  }
+
 
   // Add these methods to your existing AuthViewModel
 
@@ -609,5 +589,79 @@ Future<bool> updateProfileField(String field, dynamic value) async {
     notifyListeners();
     return false;
   }
+}
+// Add these specific clear methods to AuthViewModel
+
+/// Clear login form data
+void clearAllData() {
+  // Clear all text controllers
+  _clearAllControllers();
+  
+  // Clear other state
+  _phoneAuthModel = null;
+  _errorMessage = null;
+  _isPasswordVisible = false;
+  _isConfirmPasswordVisible = false;
+  _timer?.cancel();
+  _resendTimer = 60;
+  _canResend = false;
+  _isLoading = false;
+  
+  notifyListeners();
+}
+
+/// Clear all controllers
+void _clearAllControllers() {
+  phoneController.clear();
+  fullNameController.clear();
+  emailController.clear();
+  locationController.clear();
+  usernameController.clear();
+  passwordController.clear();
+  confirmPasswordController.clear();
+  
+  // Clear OTP controllers
+  for (var controller in otpControllers) {
+    controller.clear();
+  }
+}
+
+/// Clear login-specific data
+void clearLoginData() {
+  emailController.clear();
+  passwordController.clear();
+  _errorMessage = null;
+  _isPasswordVisible = false;
+  notifyListeners();
+}
+
+/// Clear signup-specific data  
+void clearSignupData() {
+  usernameController.clear();
+  emailController.clear();
+  passwordController.clear();
+  confirmPasswordController.clear();
+  _errorMessage = null;
+  _isPasswordVisible = false;
+  _isConfirmPasswordVisible = false;
+  notifyListeners();
+}
+
+/// Clear registration-specific data
+void clearRegistrationData() {
+  fullNameController.clear();
+  emailController.clear();
+  locationController.clear();
+  phoneController.clear();
+  _errorMessage = null;
+  notifyListeners();
+}
+
+// Update the signOut method
+Future<void> signOut() async {
+  await _repository.signOut();
+  _currentUser = null;
+  clearAllData(); // Use clearAllData instead of clearData
+  notifyListeners();
 }
 }

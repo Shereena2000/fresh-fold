@@ -111,22 +111,38 @@ class SignUpScreen extends StatelessWidget {
 
                       SizeBoxH(20),
                       
-                      // Sign Up Button
-                      CustomElavatedTextButton(
-                        text: provider.isLoading ? "Creating Account..." : "Sign Up",
-                        onPressed: provider.isLoading 
-                            ? () {}
-                            : () async {
-                                final success = await provider.signUp();
-                                if (success) {
-                                  Navigator.pushNamedAndRemoveUntil(
-                                    context,
-                                    PPages.registrationPageUi,
-                                    (route) => false,
-                                  );
-                                }
-                              },
-                      ),
+                      // Sign Up Button// In SignUpScreen, update the signup button onPressed:
+
+CustomElavatedTextButton(
+  text: provider.isLoading ? "Creating Account..." : "Sign Up",
+  onPressed: provider.isLoading 
+      ? () {}
+      : () async {
+          final success = await provider.signUp();
+          if (success && context.mounted) {
+            final status = await provider.checkAuthStatus();
+            
+            if (status == 'registration') {
+              // DON'T clear signup data - email is needed in registration form
+              provider.clearError(); // Only clear error
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                PPages.registrationPageUi,
+                (route) => false,
+              );
+            } else {
+              // Clear data only when going to wrapper (completed flow)
+              provider.clearError();
+              provider.clearSignupData();
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                PPages.wrapperPageUi,
+                (route) => false,
+              );
+            }
+          }
+        },
+),
                       
                       SizeBoxH(15),
                       
@@ -145,6 +161,7 @@ class SignUpScreen extends StatelessWidget {
                           GestureDetector(
                             onTap: () {
                               provider.clearError();
+        provider.clearSignupData();
                               Navigator.pushReplacementNamed(context, PPages.login);
                             },
                             child: Text(

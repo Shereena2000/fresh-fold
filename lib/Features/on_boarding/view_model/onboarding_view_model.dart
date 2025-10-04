@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fresh_fold/Settings/utils/p_pages.dart';
+import '../../../Settings/helper/preference_helper.dart';
 import '../model/onboarding_model.dart';
 import '../../../Settings/utils/images.dart';
 
@@ -37,8 +38,13 @@ class OnBoardingViewModel extends ChangeNotifier {
   void skipToEnd() {
     pageController.jumpToPage(pages.length - 1);
   }
-  void goToLogin(BuildContext context) {
-  Navigator.pushReplacementNamed(context, PPages.login); 
-}
 
+  Future<void> goToLogin(BuildContext context) async {
+    // Mark onboarding as completed
+    await PreferenceHelper.setOnboardingCompleted(true);
+    
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, PPages.login);
+    }
+  }
 }

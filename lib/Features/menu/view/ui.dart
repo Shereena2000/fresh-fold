@@ -3,9 +3,9 @@ import 'package:fresh_fold/Settings/common/widgets/custom_app_bar.dart';
 import 'package:fresh_fold/Settings/constants/sized_box.dart';
 import 'package:fresh_fold/Settings/utils/p_colors.dart';
 import 'package:fresh_fold/Settings/utils/p_pages.dart';
-import 'package:fresh_fold/Settings/utils/p_text_styles.dart';
-
-import '../../auth/repositories/auth_repositories.dart';
+import 'package:provider/provider.dart';
+import'../../auth/view_model.dart/auth_view_model.dart';
+import '../../wrapper/view_model/navigation_provider.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -47,36 +47,7 @@ class AccountScreen extends StatelessWidget {
               icon: Icons.logout,
               title: 'Logout',
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Logout"),
-                    content: const Text("Are you sure you want to log out?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () =>
-                            Navigator.of(context).pop(), 
-                        child: const Text("Cancel"),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          Navigator.of(context).pop(); 
-
-                          try {
-                            await AuthRepository().signOut();
-
-                            Navigator.pushReplacementNamed(context, "/login");
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Logout failed: $e")),
-                            );
-                          }
-                        },
-                        child: const Text("Logout"),
-                      ),
-                    ],
-                  ),
-                );
+                _showLogoutDialog(context);
               },
             ),
 
@@ -88,6 +59,49 @@ class AccountScreen extends StatelessWidget {
             // )
           ],
         ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Logout"),
+        content: const Text("Are you sure you want to log out?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close dialog
+
+              final authViewModel = Provider.of<AuthViewModel>(
+                context,
+                listen: false,
+              );
+
+              try {
+                await authViewModel.signOut();
+                Provider.of<NavigationProvider>(
+                  context,
+                  listen: false,
+                ).resetIndex();
+                // Navigate to login screen after successful logout
+                Navigator.pushReplacementNamed(context, "/login");
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text("Logout failed: $e")));
+                }
+              }
+            },
+            child: const Text("Logout"),
+          ),
+        ],
       ),
     );
   }
@@ -114,13 +128,13 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
-  _legalInfo({required String title, required Function onTap}) => Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: GestureDetector(
-      onTap: () => onTap(),
-      child: Text(title, style: PTextStyles.labelSmall),
-    ),
-  );
+  // _legalInfo({required String title, required Function onTap}) => Padding(
+  //   padding: const EdgeInsets.all(8.0),
+  //   child: GestureDetector(
+  //     onTap: () => onTap(),
+  //     child: Text(title, style: PTextStyles.labelSmall),
+  //   ),
+  // );
 }
 
 // class AppVersionWidget extends StatelessWidget {

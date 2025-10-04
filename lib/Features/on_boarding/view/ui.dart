@@ -34,11 +34,12 @@ class OnBoardingScreen extends StatelessWidget {
                           children: [
                             Image.asset(page.image),
                             SizeBoxH(20),
-                            Text(page.title,
-                                style: PTextStyles.displayMedium),
+                            Text(page.title, style: PTextStyles.displayMedium),
                             SizeBoxH(12),
-                            Text(page.description,
-                                style: PTextStyles.bodyMedium),
+                            Text(
+                              page.description,
+                              style: PTextStyles.bodyMedium,
+                            ),
                           ],
                         );
                       },
@@ -58,33 +59,33 @@ class OnBoardingScreen extends StatelessWidget {
                     ),
                   ),
                   SizeBoxH(20),
-                Row(
-  children: [
-    const Spacer(),
-    GestureDetector(
-      onTap: () {
-        if (provider.currentIndex == provider.pages.length - 1) {
-          // Last page → Move to Login
-          provider.goToLogin(context);
-        } else {
-          // Skip → Jump to last page
-          provider.skipToEnd();
-        }
-      },
-      child: Text(
-        provider.currentIndex == provider.pages.length - 1
-            ? "Get Started"
-            : "Skip",
-        style: getTextStyle(
-          color: PColors.black,
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
-        ),
-      ),
-    ),
-  ],
-),
-
+                  Row(
+                    children: [
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () {
+                          if (provider.currentIndex ==
+                              provider.pages.length - 1) {
+                            // Last page → Move to Login
+                            provider.goToLogin(context);
+                          } else {
+                            // Skip → Jump to last page
+                            provider.skipToEnd();
+                          }
+                        },
+                        child: Text(
+                          provider.currentIndex == provider.pages.length - 1
+                              ? "Get Started"
+                              : "Skip",
+                          style: getTextStyle(
+                            color: PColors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

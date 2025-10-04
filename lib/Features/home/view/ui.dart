@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         _buildIconButton(Icons.notifications_outlined),
                         SizeBoxV(8),
-                        _buildIconButton(Icons.person_outline),
+                      //  _buildIconButton(Icons.person_outline),
                       ],
                     ),
                   ],
