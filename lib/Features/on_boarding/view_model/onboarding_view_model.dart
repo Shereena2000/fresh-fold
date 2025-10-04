@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fresh_fold/Settings/utils/p_pages.dart';
 import '../model/onboarding_model.dart';
 import '../../../Settings/utils/images.dart';
 
@@ -37,7 +38,7 @@ class OnBoardingViewModel extends ChangeNotifier {
     pageController.jumpToPage(pages.length - 1);
   }
   void goToLogin(BuildContext context) {
-  Navigator.pushReplacementNamed(context, '/login'); 
+  Navigator.pushReplacementNamed(context, PPages.login); 
 }
 
 }

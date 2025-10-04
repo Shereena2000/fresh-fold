@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fresh_fold/Settings/utils/p_colors.dart';
 
 import '../../../../Settings/utils/p_text_styles.dart';
 
@@ -10,6 +11,6 @@ class HeadingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text(title, style: PTextStyles.displaySmall));
+    return Center(child: Text(title, style: PTextStyles.displaySmall.copyWith(color: PColors.primaryColor)));
   }
 }

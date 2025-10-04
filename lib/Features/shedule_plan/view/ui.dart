@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
+import 'package:provider/provider.dart';
 import '../../../Settings/constants/sized_box.dart';
 import '../../../Settings/constants/text_styles.dart';
 import '../../../Settings/utils/p_colors.dart';
-
-
+import '../../auth/view_model.dart/auth_view_model.dart';
+import '../../pick_up_screen/view/ui.dart';
+import '../view_model.dart/schedule_view_model.dart';
 
 
 class ScheduleWashScreen extends StatefulWidget {
@@ -16,12 +16,6 @@ class ScheduleWashScreen extends StatefulWidget {
 }
 
 class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
-  String? selectedServiceType;
-  String? selectedWashType;
-  String? selectedLocation;
-  DateTime? selectedDate;
-  String? selectedTimeSlot;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,204 +37,260 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
         ),
         centerTitle: true,
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.only(bottom: 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header Section with gradient
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        PColors.primaryColor.withOpacity(0.1),
-                        PColors.lightBlue.withOpacity(0.1),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(30),
-                      bottomRight: Radius.circular(30),
-                    ),
-                  ),
-                  padding: EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Let\'s Get Your\nClothes Fresh & Clean',
-                        style: getTextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          color: PColors.primaryColor,
-                          height: 1.3,
+      body: Consumer<ScheduleViewModel>(
+        builder: (context, scheduleProvider, child) {
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: 100),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Section with gradient
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            PColors.primaryColor.withOpacity(0.1),
+                            PColors.lightBlue.withOpacity(0.1),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(30),
+                          bottomRight: Radius.circular(30),
                         ),
                       ),
-                      SizeBoxH(8),
-                      Text(
-                        'Schedule your pickup in just a few steps',
-                        style: getTextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: PColors.darkGray.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                SizeBoxH(24),
-
-                // Pickup Location
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionLabel('Pickup Location', Icons.location_on),
-                      SizeBoxH(12),
-                      _buildLocationCard(),
-                    ],
-                  ),
-                ),
-
-                SizeBoxH(24),
-
-                // Date & Time Selection
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionLabel('When should we pick up?', Icons.calendar_today),
-                      SizeBoxH(12),
-                      Row(
+                      padding: EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: _buildDateCard()),
-                          SizeBoxV(12),
-                          Expanded(child: _buildTimeCard()),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                SizeBoxH(24),
-
-                // Service Type
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionLabel('Service Type', Icons.local_shipping),
-                      SizeBoxH(12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildServiceTypeCard(
-                              'Regular',
-                              Icons.star_outline,
-                              '2-3 Days',
-                              'regular',
+                          Text(
+                            'Let\'s Get Your\nClothes Fresh & Clean',
+                            style: getTextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              color: PColors.primaryColor,
+                              height: 1.3,
                             ),
                           ),
-                          SizeBoxV(12),
-                          Expanded(
-                            child: _buildServiceTypeCard(
-                              'Express',
-                              Icons.flash_on,
-                              '24 Hours',
-                              'express',
-                            ),
-                          ),
-                          SizeBoxV(12),
-                          Expanded(
-                            child: _buildServiceTypeCard(
-                              'Premium',
-                              Icons.diamond_outlined,
-                              'Same Day',
-                              'premium',
+                          SizeBoxH(8),
+                          Text(
+                            'Schedule your pickup in just a few steps',
+                            style: getTextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: PColors.darkGray.withOpacity(0.7),
                             ),
                           ),
                         ],
                       ),
+                    ),
+
+                    SizeBoxH(24),
+
+                    // Error Message
+                    if (scheduleProvider.errorMessage != null) ...[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.red.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.error_outline, color: Colors.red, size: 20),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  scheduleProvider.errorMessage!,
+                                  style: TextStyle(color: Colors.red, fontSize: 14),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizeBoxH(12),
                     ],
-                  ),
-                ),
 
-                SizeBoxH(24),
-
-                // Wash Type
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionLabel('Wash Type', Icons.local_laundry_service),
-                      SizeBoxH(12),
-                      _buildWashTypeCard(
-                        'Dry Cleaning & Steam Press',
-                        Icons.iron,
-                        'Perfect for delicate fabrics',
-                        'dry_clean',
+                    // Pickup Location
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionLabel('Pickup Location', Icons.location_on),
+                          SizeBoxH(12),
+                          _buildLocationCard(scheduleProvider),
+                        ],
                       ),
-                      SizeBoxH(12),
-                      _buildWashTypeCard(
-                        'Wash & Steam Press',
-                        Icons.local_laundry_service,
-                        'Deep clean with professional press',
-                        'wash_press',
+                    ),
+
+                    SizeBoxH(24),
+
+                    // Date & Time Selection
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionLabel(
+                            'When should we pick up?',
+                            Icons.calendar_today,
+                          ),
+                          SizeBoxH(12),
+                          Row(
+                            children: [
+                              Expanded(child: _buildDateCard(scheduleProvider)),
+                              SizeBoxV(12),
+                              Expanded(child: _buildTimeCard(scheduleProvider)),
+                            ],
+                          ),
+                        ],
                       ),
-                      SizeBoxH(12),
-                      _buildWashTypeCard(
-                        'Steam Press Only',
-                        Icons.iron_outlined,
-                        'Just ironing service',
-                        'press_only',
+                    ),
+
+                    SizeBoxH(24),
+
+                    // Service Type
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionLabel('Service Type', Icons.local_shipping),
+                          SizeBoxH(12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildServiceTypeCard(
+                                  scheduleProvider,
+                                  'Regular',
+                                  Icons.star_outline,
+                                  '2-3 Days',
+                                  'regular',
+                                ),
+                              ),
+                              SizeBoxV(12),
+                              Expanded(
+                                child: _buildServiceTypeCard(
+                                  scheduleProvider,
+                                  'Express',
+                                  Icons.flash_on,
+                                  '24 Hours',
+                                  'express',
+                                ),
+                              ),
+                              SizeBoxV(12),
+                              Expanded(
+                                child: _buildServiceTypeCard(
+                                  scheduleProvider,
+                                  'Premium',
+                                  Icons.diamond_outlined,
+                                  'Same Day',
+                                  'premium',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+
+                    SizeBoxH(24),
+
+                    // Wash Type
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionLabel(
+                            'Wash Type',
+                            Icons.local_laundry_service,
+                          ),
+                          SizeBoxH(12),
+                          _buildWashTypeCard(
+                            scheduleProvider,
+                            'Dry Cleaning & Steam Press',
+                            Icons.iron,
+                            'Perfect for delicate fabrics',
+                            'dry_clean',
+                          ),
+                          SizeBoxH(12),
+                          _buildWashTypeCard(
+                            scheduleProvider,
+                            'Wash & Steam Press',
+                            Icons.local_laundry_service,
+                            'Deep clean with professional press',
+                            'wash_press',
+                          ),
+                          SizeBoxH(12),
+                          _buildWashTypeCard(
+                            scheduleProvider,
+                            'Steam Press Only',
+                            Icons.iron_outlined,
+                            'Just ironing service',
+                            'press_only',
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizeBoxH(24),
+
+                    // Get Rate Card
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: _buildGetRateCard(),
+                    ),
+
+                    SizeBoxH(24),
+                  ],
                 ),
-
-                SizeBoxH(24),
-
-                // Get Rate Card
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: _buildGetRateCard(),
-                ),
-
-                SizeBoxH(24),
-              ],
-            ),
-          ),
-
-          // Bottom Button
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: Offset(0, -5),
-                  ),
-                ],
               ),
-              child: _buildScheduleButton(),
-            ),
-          ),
-        ],
+
+              // Bottom Button
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: Offset(0, -5),
+                      ),
+                    ],
+                  ),
+                  child: _buildScheduleButton(scheduleProvider),
+                ),
+              ),
+
+              // Loading Overlay
+              if (scheduleProvider.isLoading)
+                Container(
+                  color: Colors.black54,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: PColors.primaryColor,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -269,7 +319,7 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
     );
   }
 
-  Widget _buildLocationCard() {
+  Widget _buildLocationCard(ScheduleViewModel provider) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -286,8 +336,20 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            // Handle location selection
+          onTap: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MapLocationPickerScreen(),
+              ),
+            );
+
+            if (result != null) {
+              provider.setLocation(
+                result['address'],
+                result['location'],
+              );
+            }
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
@@ -306,32 +368,29 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
                     size: 24,
                   ),
                 ),
-                SizeBoxV(16),
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        selectedLocation ?? 'Choose Pickup Location',
-                        style: getTextStyle(
+                        provider.selectedLocation ?? 'Choose Pickup Location',
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: selectedLocation != null
+                          color: provider.selectedLocation != null
                               ? PColors.primaryColor
                               : PColors.darkGray.withOpacity(0.5),
                         ),
                       ),
-                      if (selectedLocation != null) ...[
-                        SizeBoxH(4),
+                      if (provider.selectedLocation != null)
                         Text(
                           'Tap to change',
-                          style: getTextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.w400,
                             color: PColors.darkGray.withOpacity(0.5),
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ),
@@ -348,7 +407,7 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
     );
   }
 
-  Widget _buildDateCard() {
+  Widget _buildDateCard(ScheduleViewModel provider) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -373,7 +432,7 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
               lastDate: DateTime.now().add(Duration(days: 30)),
             );
             if (date != null) {
-              setState(() => selectedDate = date);
+              provider.setDate(date);
             }
           },
           borderRadius: BorderRadius.circular(16),
@@ -382,7 +441,11 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.calendar_today, color: PColors.primaryColor, size: 22),
+                Icon(
+                  Icons.calendar_today,
+                  color: PColors.primaryColor,
+                  size: 22,
+                ),
                 SizeBoxH(8),
                 Text(
                   'Date',
@@ -394,8 +457,8 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
                 ),
                 SizeBoxH(4),
                 Text(
-                  selectedDate != null
-                      ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
+                  provider.selectedDate != null
+                      ? '${provider.selectedDate!.day}/${provider.selectedDate!.month}/${provider.selectedDate!.year}'
                       : 'Select',
                   style: getTextStyle(
                     fontSize: 14,
@@ -411,7 +474,7 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
     );
   }
 
-  Widget _buildTimeCard() {
+  Widget _buildTimeCard(ScheduleViewModel provider) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -429,7 +492,7 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            _showTimeSlotBottomSheet();
+            _showTimeSlotBottomSheet(provider);
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
@@ -449,7 +512,7 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
                 ),
                 SizeBoxH(4),
                 Text(
-                  selectedTimeSlot ?? 'Select',
+                  provider.selectedTimeSlot ?? 'Select',
                   style: getTextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -465,14 +528,15 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
   }
 
   Widget _buildServiceTypeCard(
+    ScheduleViewModel provider,
     String title,
     IconData icon,
     String subtitle,
     String value,
   ) {
-    final isSelected = selectedServiceType == value;
+    final isSelected = provider.selectedServiceType == value;
     return GestureDetector(
-      onTap: () => setState(() => selectedServiceType = value),
+      onTap: () => provider.setServiceType(value),
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         decoration: BoxDecoration(
@@ -530,14 +594,15 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
   }
 
   Widget _buildWashTypeCard(
+    ScheduleViewModel provider,
     String title,
     IconData icon,
     String subtitle,
     String value,
   ) {
-    final isSelected = selectedWashType == value;
+    final isSelected = provider.selectedWashType == value;
     return GestureDetector(
-      onTap: () => setState(() => selectedWashType = value),
+      onTap: () => provider.setWashType(value),
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         decoration: BoxDecoration(
@@ -638,7 +703,7 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Handle get rate card
+            // Handle get rate card - navigate to rate card screen
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
@@ -695,7 +760,7 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
     );
   }
 
-  Widget _buildScheduleButton() {
+  Widget _buildScheduleButton(ScheduleViewModel scheduleProvider) {
     return Container(
       width: double.infinity,
       height: 56,
@@ -715,27 +780,74 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            // Handle schedule wash
-          },
+          onTap: scheduleProvider.isLoading
+              ? null
+              : () async {
+                  final authProvider = Provider.of<AuthViewModel>(
+                    context,
+                    listen: false,
+                  );
+                  
+                  final userId = authProvider.currentUser?.uid;
+                  
+                  if (userId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Please login to schedule a wash'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+
+                  final success = await scheduleProvider.createSchedule(userId);
+                  
+                  if (success && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(Icons.check_circle, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text('Schedule created successfully!'),
+                          ],
+                        ),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    
+                    // Navigate back or to orders screen
+                    Navigator.pop(context);
+                  }
+                },
           borderRadius: BorderRadius.circular(16),
           child: Center(
-            child: Text(
-              'Schedule Wash',
-              style: getTextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                letterSpacing: 0.5,
-              ),
-            ),
+            child: scheduleProvider.isLoading
+                ? SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'Schedule Wash',
+                    style: getTextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
           ),
         ),
       ),
     );
   }
 
-  void _showTimeSlotBottomSheet() {
+  void _showTimeSlotBottomSheet(ScheduleViewModel provider) {
     final timeSlots = [
       '9:00 AM - 11:00 AM',
       '11:00 AM - 1:00 PM',
@@ -746,7 +858,7 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
 
     showModalBottomSheet(
       context: context,
-       isScrollControlled: true,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
@@ -778,49 +890,51 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
               ),
             ),
             SizeBoxH(16),
-            ...timeSlots.map((slot) => Padding(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: InkWell(
-                    onTap: () {
-                      setState(() => selectedTimeSlot = slot);
-                      Navigator.pop(context);
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: selectedTimeSlot == slot
-                            ? PColors.primaryColor.withOpacity(0.1)
-                            : PColors.lightGray.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: selectedTimeSlot == slot
-                              ? PColors.primaryColor
-                              : Colors.transparent,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            color: PColors.primaryColor,
-                            size: 20,
-                          ),
-                          SizeBoxV(12),
-                          Text(
-                            slot,
-                            style: getTextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: PColors.primaryColor,
-                            ),
-                          ),
-                        ],
+            ...timeSlots.map(
+              (slot) => Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: InkWell(
+                  onTap: () {
+                    provider.setTimeSlot(slot);
+                    Navigator.pop(context);
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: provider.selectedTimeSlot == slot
+                          ? PColors.primaryColor.withOpacity(0.1)
+                          : PColors.lightGray.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: provider.selectedTimeSlot == slot
+                            ? PColors.primaryColor
+                            : Colors.transparent,
+                        width: 1.5,
                       ),
                     ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          color: PColors.primaryColor,
+                          size: 20,
+                        ),
+                        SizeBoxV(12),
+                        Text(
+                          slot,
+                          style: getTextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: PColors.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                )),
+                ),
+              ),
+            ),
             SizeBoxH(12),
           ],
         ),

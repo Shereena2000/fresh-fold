@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../constants/sized_box.dart';
 import '../../constants/text_styles.dart';
 import '../../utils/p_colors.dart';
 
@@ -11,16 +10,11 @@ class CustomElavatedTextButton extends StatelessWidget {
     required this.text,
     this.width,
     this.height,
-    this.padverticle,
-    this.padhorizondal,
     this.fontSize,
-    this.bgcolor,
     this.borderRadius,
     this.textColor,
-    this.borderColor,
-    this.icon, // ✅ added icon
+    this.icon,
     this.iconSpacing,
-    this.prefixIcon, // ✅ spacing between text and icon
   });
 
   final void Function()? onPressed;
@@ -28,60 +22,58 @@ class CustomElavatedTextButton extends StatelessWidget {
   final double? width;
   final double? height;
   final double? fontSize;
-  final double? padverticle;
-  final double? padhorizondal;
-  final Color? bgcolor;
   final double? borderRadius;
-  final Color? borderColor;
   final Color? textColor;
-  final Widget? icon; // ✅ optional icon
+  final Widget? icon;
   final double? iconSpacing;
-  final Widget? prefixIcon;
 
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.sizeOf(context);
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: bgcolor ?? PColors.primaryColor,
-        padding: EdgeInsets.symmetric(
-          vertical: padverticle ?? 8,
-          horizontal: padhorizondal ?? 16,
+
+    return Container(
+      width: width ?? size.width - 40,
+      height: height ?? 60,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [PColors.primaryColor, PColors.secondoryColor],
         ),
-        fixedSize: Size(width ?? size.width - 40, height ?? 50),
-        maximumSize: Size(width ?? size.width - 40, height ?? 50),
-        minimumSize: Size(width ?? size.width - 40, height ?? 50),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: borderColor ?? Colors.transparent),
-          borderRadius: BorderRadius.circular(borderRadius ?? 8),
-        ),
-        elevation: 0,
-        shadowColor: Colors.transparent,
+        borderRadius: BorderRadius.circular(borderRadius ?? 16),
+        boxShadow: [
+          BoxShadow(
+            color: PColors.primaryColor.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      onPressed: onPressed,
-      child: Row(
-        mainAxisSize: MainAxisSize.min, // keeps row compact
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (prefixIcon != null) ...[
-            SizedBox(width: iconSpacing ?? 8), // space between text & icon
-            prefixIcon!,
-          ],
-          SizeBoxV(5),
-          Text(
-            text,
-            textAlign: TextAlign.center,
-            style: getTextStyle(
-              fontSize: fontSize ?? 16,
-              color: textColor ?? PColors.white,
-              fontWeight: FontWeight.w600,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(borderRadius ?? 16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(borderRadius ?? 16),
+          onTap: onPressed,
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  icon!,
+                  SizedBox(width: iconSpacing ?? 12),
+                ],
+                Text(
+                  text,
+                  style: getTextStyle(
+                    fontSize: fontSize ?? 18,
+                    fontWeight: FontWeight.w600,
+                    color: textColor ?? Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
           ),
-          if (icon != null) ...[
-            SizedBox(width: iconSpacing ?? 8), // space between text & icon
-            icon!,
-          ],
-        ],
+        ),
       ),
     );
   }

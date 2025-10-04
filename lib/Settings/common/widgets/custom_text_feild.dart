@@ -35,6 +35,9 @@ class CustomTextFeild extends StatefulWidget {
   final TextInputType? keyboardType;
   final bool readOnly;
 
+  /// 🔑 New property
+  final bool obscureText;
+
   const CustomTextFeild({
     super.key,
     this.onTap,
@@ -65,6 +68,9 @@ class CustomTextFeild extends StatefulWidget {
     this.readOnly = false,
     this.height,
     this.prefixIconSize,
+
+    /// default = false
+    this.obscureText = false,
   });
 
   @override
@@ -76,25 +82,25 @@ class _CustomTextFeildState extends State<CustomTextFeild> {
     return InputDecoration(
       prefixIcon: widget.prefixIcon != null
           ? GestureDetector(
-              onTap: widget.prefixfn!,
+              onTap: widget.prefixfn,
               child: Container(
                 width: widget.prefixIconSize ?? 24,
                 height: widget.prefixIconSize ?? 24,
                 alignment: Alignment.center,
                 child: IconTheme(
-      data: const IconThemeData(color: Colors.black), 
-      child: widget.prefixIcon!,
-    ),
+                  data: const IconThemeData(color: Colors.black),
+                  child: widget.prefixIcon!,
+                ),
               ),
             )
           : null,
       suffixIcon: widget.suffixIcon != null
           ? GestureDetector(
-              onTap: widget.sufixfn!,
+              onTap: widget.sufixfn,
               child: Container(
                 width: widget.suffixIconSize ?? 24,
                 height: widget.suffixIconSize ?? 24,
-                alignment: Alignment.center, // Center the icon
+                alignment: Alignment.center,
                 child: widget.suffixIcon!,
               ),
             )
@@ -108,17 +114,11 @@ class _CustomTextFeildState extends State<CustomTextFeild> {
       fillColor: widget.filColor ?? PColors.white,
       counterText: '',
       hintText: widget.hintText,
-      hintStyle: widget.hintColor != null
-          ? getTextStyle(
-              fontSize: 13,
-              color: widget.hintColor,
-              fontWeight: FontWeight.w400,
-            )
-          : getTextStyle(
-              fontSize: 13,
-              color: widget.hintColor,
-              fontWeight: FontWeight.w400,
-            ),
+      hintStyle: getTextStyle(
+        fontSize: 13,
+        color: widget.hintColor,
+        fontWeight: FontWeight.w400,
+      ),
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(
           width: 1.5,
@@ -166,6 +166,10 @@ class _CustomTextFeildState extends State<CustomTextFeild> {
             cursorColor: Theme.of(context).colorScheme.primary,
             maxLines: widget.maxLine ?? 1,
             maxLength: widget.maxLength,
+
+            /// 👇 add obscure here
+            obscureText: widget.obscureText,
+
             style: getTextStyle(
               color: widget.textColor ?? PColors.color000000,
               fontSize: 16,

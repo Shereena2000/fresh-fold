@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../Features/auth/mobile_num_verification/view/ui.dart';
-import '../../Features/auth/otp_verification/view/ui.dart';
-import '../../Features/auth/registration/view/ui.dart';
+import 'package:fresh_fold/Features/auth/view/sigin.dart';
+import 'package:fresh_fold/Features/auth/view/sign_up.dart';
+
+import '../../Features/auth/view/mobile_verification.dart';
+import '../../Features/auth/view/otp_verification.dart';
+import '../../Features/auth/view/registration.dart';
 import '../../Features/on_boarding/view/ui.dart';
+import '../../Features/pick_up_screen/view/ui.dart';
 import '../../Features/profile/view/ui.dart';
 import '../../Features/shedule_plan/view/ui.dart';
 import '../../Features/splash/view/splash_screen.dart';
@@ -14,7 +18,11 @@ class Routes {
     switch (settings.name) {
       case PPages.splash:
         return MaterialPageRoute(builder: (context) => SplashScreen());
-      case PPages.login:
+              case PPages.login:
+        return MaterialPageRoute(builder: (context) => LoginScreen());
+              case PPages.signUp:
+        return MaterialPageRoute(builder: (context) => SignUpScreen());
+      case PPages.mobileVerifcation:
         return MaterialPageRoute(
           builder: (context) => MobileNumberVerficationScreen(),
         );
@@ -31,6 +39,11 @@ class Routes {
         return MaterialPageRoute(builder: (context) => ScheduleWashScreen());
       case PPages.profilePageUi:
         return MaterialPageRoute(builder: (context) => ProfileScreen());
+      case PPages.pickUpLocationPageUi:
+        return MaterialPageRoute(builder: (context) => MapLocationPickerScreen());
+
+
+
 
 
       default:

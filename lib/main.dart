@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,15 +7,12 @@ import 'Settings/utils/p_colors.dart';
 import 'Settings/utils/p_pages.dart';
 import 'Settings/utils/p_routes.dart';
 
-void main() {
-  runApp(
-   MultiProvider(
-  providers: providers,
- child: 
-    MyApp(),
- )
-  );
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MultiProvider(providers: providers, child: MyApp()));
 }
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
@@ -23,7 +21,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-     return MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
       title: 'FreshFold',
@@ -50,6 +48,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-
