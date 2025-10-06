@@ -99,6 +99,7 @@ class LoginScreen extends StatelessWidget {
                                       final status = await provider
                                           .checkAuthStatus();
                                       if (status == 'registration') {
+                                        provider.prepareRegistrationData();
                                         Navigator.pushNamedAndRemoveUntil(
                                           context,
                                           PPages.registrationPageUi,

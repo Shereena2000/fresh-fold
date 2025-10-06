@@ -11,4 +11,6 @@ class PPages {
   static const String schedulePageUi = "/schedulePageUi";
   static const String profilePageUi = "/profilePageUi";
   static const String pickUpLocationPageUi = "/pickUpLocationPageUi";
+  static const String privacyPolicyUi = "/privacyPolicyUi";
+
 }

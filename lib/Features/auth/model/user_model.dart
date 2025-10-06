@@ -74,7 +74,10 @@ class UserModel {
   }
 
   bool get isRegistered {
-    return fullName != null && fullName!.isNotEmpty;
+     return fullName != null && 
+         fullName!.isNotEmpty && 
+         location != null && 
+         location!.isNotEmpty;
   }
 
   UserModel copyWith({

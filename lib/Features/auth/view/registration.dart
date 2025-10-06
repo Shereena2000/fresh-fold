@@ -33,29 +33,21 @@ class RegistrationScreen extends StatelessWidget {
                       hintText: "Mobile Number",
                       textHead: "Mobile Number",
                       controller: viewModel.phoneController,
+                       keyboardType: TextInputType.phone,
                    //   readOnly: true,
                     ),
                     SizeBoxH(18),
                     
-                    CustomTextFeild(
-                      prefixfn: () {},
-                      prefixIcon: Icon(Icons.person),
-                      hintText: "Full Name",
-                      textHead: "Full Name",
-                      controller: viewModel.fullNameController,
-                    ),
-                    SizeBoxH(18),
+                    // CustomTextFeild(
+                    //   prefixfn: () {},
+                    //   prefixIcon: Icon(Icons.person),
+                    //   hintText: "Full Name",
+                    //   textHead: "Full Name",
+                    //   controller: viewModel.fullNameController,
+                    // ),
+                    // SizeBoxH(18),
                     
-                    CustomTextFeild(
-                      prefixfn: () {},
-                      prefixIcon: Icon(Icons.email),
-                      hintText: "Email",
-                      textHead: "Email",
-                      controller: viewModel.emailController,
-                      keyboardType: TextInputType.emailAddress,
-                          //   readOnly: true,
-                    ),
-                    SizeBoxH(18),
+                    
                     
                     CustomTextFeild(
                       prefixfn: () {},
@@ -64,6 +56,16 @@ class RegistrationScreen extends StatelessWidget {
                       textHead: "Location",
                       controller: viewModel.locationController,
                     ),
+                         SizeBoxH(18),
+                    CustomTextFeild(
+                      prefixfn: () {},
+                      prefixIcon: Icon(Icons.email),
+                      hintText: "Email",
+                      textHead: "Email",
+                      controller: viewModel.emailController,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    SizeBoxH(18),
                     
                     if (viewModel.errorMessage != null) ...[
                       const SizeBoxH(16),

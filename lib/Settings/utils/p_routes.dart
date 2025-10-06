@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fresh_fold/Features/auth/view/sigin.dart';
 import 'package:fresh_fold/Features/auth/view/sign_up.dart';
+import 'package:fresh_fold/Features/legal_info/privacy_policy/view/ui.dart';
 
 import '../../Features/auth/view/mobile_verification.dart';
 import '../../Features/auth/view/otp_verification.dart';
@@ -41,6 +42,10 @@ class Routes {
         return MaterialPageRoute(builder: (context) => ProfileScreen());
       case PPages.pickUpLocationPageUi:
         return MaterialPageRoute(builder: (context) => MapLocationPickerScreen());
+    case PPages.privacyPolicyUi:
+        return MaterialPageRoute(builder: (context) => PrivacyPolicyScreen());
+
+
 
 
 

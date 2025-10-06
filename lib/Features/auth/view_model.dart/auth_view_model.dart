@@ -444,11 +444,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<bool> registerUser() async {
-    if (fullNameController.text.isEmpty) {
-      _errorMessage = 'Please enter your full name';
-      notifyListeners();
-      return false;
-    }
+
 
     if (emailController.text.isEmpty) {
       _errorMessage = 'Please enter your email';
@@ -588,6 +584,18 @@ Future<bool> updateProfileField(String field, dynamic value) async {
     _errorMessage = e.toString();
     notifyListeners();
     return false;
+  }
+}
+// Add this method to AuthViewModel
+void prepareRegistrationData() {
+  // Pre-fill controllers with existing user data
+  if (_currentUser != null) {
+    if (_currentUser!.email != null && _currentUser!.email!.isNotEmpty) {
+      emailController.text = _currentUser!.email!;
+    }
+    if (_currentUser!.fullName != null && _currentUser!.fullName!.isNotEmpty) {
+      fullNameController.text = _currentUser!.fullName!;
+    }
   }
 }
 // Add these specific clear methods to AuthViewModel

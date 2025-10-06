@@ -26,22 +26,24 @@ class AccountScreen extends StatelessWidget {
                 Navigator.pushNamed(context, PPages.profilePageUi);
               },
             ),
-            _buildMenuItem(
-              icon: Icons.favorite,
-              title: 'About Us',
-              onTap: () {},
-            ),
-            _buildMenuItem(
-              icon: Icons.local_offer,
-              title: 'Terms of Use',
-              onTap: () {
-                Navigator.pushNamed(context, '/discount');
-              },
-            ),
+            // _buildMenuItem(
+            //   icon: Icons.favorite,
+            //   title: 'About Us',
+            //   onTap: () {},
+            // ),
+            // _buildMenuItem(
+            //   icon: Icons.local_offer,
+            //   title: 'Terms of Use',
+            //   onTap: () {
+            // //    Navigator.pushNamed(context, '/discount');
+            //   },
+            // ),
             _buildMenuItem(
               icon: Icons.save_alt,
               title: 'Privacy Policy',
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context, PPages.privacyPolicyUi);
+              },
             ),
             _buildMenuItem(
               icon: Icons.logout,

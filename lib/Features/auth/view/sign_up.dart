@@ -36,7 +36,7 @@ class SignUpScreen extends StatelessWidget {
                       // Username Field
                       CustomTextFeild(
                         controller: provider.usernameController,
-                        hintText: "Username",
+                        hintText: "Full Name",
                         // enabled: !provider.isLoading,
                       ),
                       SizeBoxH(12),
@@ -123,6 +123,7 @@ CustomElavatedTextButton(
             final status = await provider.checkAuthStatus();
             
             if (status == 'registration') {
+              provider.prepareRegistrationData();
               // DON'T clear signup data - email is needed in registration form
               provider.clearError(); // Only clear error
               Navigator.pushNamedAndRemoveUntil(
