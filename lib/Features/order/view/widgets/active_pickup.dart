@@ -1,59 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../../shedule_plan/model/schedule_model.dart';
+import '../../view_model/order_view_model.dart';
 import 'order_card.dart';
 
-class ActivePickup extends StatefulWidget {
+class ActivePickup extends StatelessWidget {
   const ActivePickup({super.key});
 
   @override
-  State<ActivePickup> createState() => _ActivePickupState();
-}
-
-class _ActivePickupState extends State<ActivePickup> {
-  Set<String> expandedCards = {};
-
-  @override
   Widget build(BuildContext context) {
-    // Example data - Replace with your actual data
-    final schedules = [
-      ScheduleModel(
-        scheduleId: '496006',
-        userId: 'user123',
-        serviceType: 'regular',
-        washType: 'dry_clean',
-        pickupLocation: '134, XR5J+7RG, Mohammed Ali Rd, Bhuleshwar, Mumbai, Maharashtra 400003, India',
-        latitude: 18.9512,
-        longitude: 72.8326,
-        pickupDate: DateTime(2025, 10, 4),
-        timeSlot: '9 AM-11 AM',
-        status: 'pickup_requested',
-        createdAt: DateTime.now(),
-      ),
-    ];
+    return Consumer<OrderViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.isLoading) {
+          return Center(child: CircularProgressIndicator());
+        }
 
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: 16),
-      itemCount: schedules.length,
-      itemBuilder: (context, index) {
-        final schedule = schedules[index];
-        return OrderCard(
-          schedule: schedule,
-          isExpanded: expandedCards.contains(schedule.scheduleId),
-          onToggleExpand: () {
-            setState(() {
-              if (expandedCards.contains(schedule.scheduleId)) {
-                expandedCards.remove(schedule.scheduleId);
-              } else {
-                expandedCards.add(schedule.scheduleId);
-              }
-            });
-          },
-          onReschedule: () {
-            // Handle reschedule
-          },
-          onCancel: () {
-            // Handle cancel
+        if (viewModel.activePickups.isEmpty) {
+          return Center(
+            child: Text(
+              'No active pickups',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          itemCount: viewModel.activePickups.length,
+          itemBuilder: (context, index) {
+            final schedule = viewModel.activePickups[index];
+            return OrderCard(
+              schedule: schedule,
+              scheduleId: schedule.scheduleId,
+            );
           },
         );
       },

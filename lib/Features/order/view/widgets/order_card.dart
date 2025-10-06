@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../Settings/constants/sized_box.dart';
 import '../../../../Settings/utils/p_colors.dart';
+import '../../../auth/view_model.dart/auth_view_model.dart';
 import '../../../shedule_plan/model/schedule_model.dart';
+import '../../view_model/order_view_model.dart';
 
 class OrderCard extends StatelessWidget {
   final ScheduleModel schedule;
-  final bool isExpanded;
-  final VoidCallback? onToggleExpand;
-  final VoidCallback? onReschedule;
-  final VoidCallback? onCancel;
+  final String scheduleId;
 
   const OrderCard({
     super.key,
     required this.schedule,
-    this.isExpanded = false,
-    this.onToggleExpand,
-    this.onReschedule,
-    this.onCancel,
+    required this.scheduleId,
   });
 
   Color _getStatusColor() {
@@ -53,224 +50,290 @@ class OrderCard extends StatelessWidget {
         return schedule.status;
     }
   }
+void _handleReschedule(BuildContext context) {
+  final authProvider = Provider.of<AuthViewModel>(context, listen: false);
+  final userId = authProvider.currentUser?.uid;
+  
+  if (userId == null) return;
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Reschedule Order'),
+      content: Text('Reschedule functionality for order $scheduleId'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            context.read<OrderViewModel>().rescheduleOrder(userId, scheduleId);
+            Navigator.pop(context);
+          },
+          child: Text('Confirm'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _handleCancel(BuildContext context) {
+  final authProvider = Provider.of<AuthViewModel>(context, listen: false);
+  final userId = authProvider.currentUser?.uid;
+  
+  if (userId == null) return;
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Cancel Order'),
+      content: Text('Are you sure you want to cancel this order?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('No'),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: PColors.errorRed),
+          onPressed: () async {
+            await context.read<OrderViewModel>().cancelOrder(userId, scheduleId);
+            if (context.mounted) Navigator.pop(context);
+          },
+          child: Text('Yes, Cancel'),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: PColors.lightGray, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: PColors.primaryColor.withOpacity(0.08),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Header with status
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: PColors.lightGray.withOpacity(0.5),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+    return Consumer<OrderViewModel>(
+      builder: (context, viewModel, child) {
+        final isExpanded = viewModel.isExpanded(scheduleId);
+
+        return Container(
+          margin: EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: PColors.lightGray, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: PColors.primaryColor.withOpacity(0.08),
+                blurRadius: 12,
+                offset: Offset(0, 4),
               ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: PColors.primaryColor,
-                  size: 20,
-                ),
-                SizeBoxV(8),
-                Text(
-                  'Pickup Status : ',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: PColors.primaryColor,
-                  ),
-                ),
-                Text(
-                  _getStatusText(),
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: _getStatusColor(),
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
-
-          // Progress Indicator
-          if (schedule.status.toLowerCase() != 'cancelled' &&
-              schedule.status.toLowerCase() != 'completed')
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildProgressStep(true, Icons.person, 'Requested'),
-                  _buildProgressLine(schedule.status.toLowerCase() == 'in_progress'),
-                  _buildProgressStep(
-                    schedule.status.toLowerCase() == 'in_progress',
-                    Icons.local_shipping,
-                    'Pickup',
+          child: Column(
+            children: [
+              // Header with status
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: PColors.lightGray.withOpacity(0.5),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
-                ],
-              ),
-            ),
-
-          // Order Details
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDetailRow(
-                  'Reference ID',
-                  schedule.scheduleId,
-                  Icons.tag,
                 ),
-                SizeBoxH(12),
-                _buildDetailRow(
-                  'Pickup Date',
-                  DateFormat('dd-MM-yyyy').format(schedule.pickupDate),
-                  Icons.calendar_today,
-                ),
-                SizeBoxH(12),
-                _buildDetailRow(
-                  'Service Type',
-                  _formatServiceType(schedule.serviceType),
-                  Icons.star_outline,
-                ),
-                SizeBoxH(12),
-                _buildDetailRow(
-                  'Discount',
-                  'NA',
-                  Icons.discount,
-                ),
-                
-                if (isExpanded) ...[
-                  SizeBoxH(12),
-                  _buildDetailRow(
-                    'Address',
-                    schedule.pickupLocation,
-                    Icons.location_on,
-                    isAddress: true,
-                  ),
-                  SizeBoxH(12),
-                  _buildDetailRow(
-                    'Wash Type',
-                    _formatWashType(schedule.washType),
-                    Icons.local_laundry_service,
-                  ),
-                  SizeBoxH(12),
-                  _buildDetailRow(
-                    'Time Slot',
-                    schedule.timeSlot,
-                    Icons.access_time,
-                  ),
-                ],
-
-                // View More/Less Button
-                SizeBoxH(12),
-                GestureDetector(
-                  onTap: onToggleExpand,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        isExpanded ? 'View less' : 'View more',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: PColors.primaryColor,
-                        ),
-                      ),
-                      SizeBoxV(4),
-                      Icon(
-                        isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: PColors.primaryColor,
+                      size: 20,
+                    ),
+                    SizeBoxV(8),
+                    Text(
+                      'Pickup Status : ',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                         color: PColors.primaryColor,
-                        size: 20,
+                      ),
+                    ),
+                    Text(
+                      _getStatusText(),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: _getStatusColor(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Progress Indicator
+              if (schedule.status.toLowerCase() != 'cancelled' &&
+                  schedule.status.toLowerCase() != 'completed')
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildProgressStep(true, Icons.person, 'Requested'),
+                      _buildProgressLine(
+                          schedule.status.toLowerCase() == 'in_progress'),
+                      _buildProgressStep(
+                        schedule.status.toLowerCase() == 'in_progress',
+                        Icons.local_shipping,
+                        'Pickup',
                       ),
                     ],
                   ),
                 ),
 
-                // Action Buttons
-                if (schedule.status.toLowerCase() != 'cancelled' &&
-                    schedule.status.toLowerCase() != 'completed') ...[
-                  SizeBoxH(16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: onReschedule,
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: PColors.lightBlue, width: 1.5),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          child: Text(
-                            'Reschedule',
+              // Order Details
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDetailRow(
+                      'Reference ID',
+                      schedule.scheduleId,
+                      Icons.tag,
+                    ),
+                    SizeBoxH(12),
+                    _buildDetailRow(
+                      'Pickup Date',
+                      DateFormat('dd-MM-yyyy').format(schedule.pickupDate),
+                      Icons.calendar_today,
+                    ),
+                    SizeBoxH(12),
+                    _buildDetailRow(
+                      'Service Type',
+                      _formatServiceType(schedule.serviceType),
+                      Icons.star_outline,
+                    ),
+                    SizeBoxH(12),
+                    _buildDetailRow(
+                      'Discount',
+                      'NA',
+                      Icons.discount,
+                    ),
+
+                    if (isExpanded) ...[
+                      SizeBoxH(12),
+                      _buildDetailRow(
+                        'Address',
+                        schedule.pickupLocation,
+                        Icons.location_on,
+                        isAddress: true,
+                      ),
+                      SizeBoxH(12),
+                      _buildDetailRow(
+                        'Wash Type',
+                        _formatWashType(schedule.washType),
+                        Icons.local_laundry_service,
+                      ),
+                      SizeBoxH(12),
+                      _buildDetailRow(
+                        'Time Slot',
+                        schedule.timeSlot,
+                        Icons.access_time,
+                      ),
+                    ],
+
+                    // View More/Less Button
+                    SizeBoxH(12),
+                    GestureDetector(
+                      onTap: () => viewModel.toggleExpand(scheduleId),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            isExpanded ? 'View less' : 'View more',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: PColors.primaryColor,
                             ),
                           ),
-                        ),
+                          SizeBoxV(4),
+                          Icon(
+                            isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: PColors.primaryColor,
+                            size: 20,
+                          ),
+                        ],
                       ),
-                      SizeBoxV(12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: onCancel,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: PColors.errorRed,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                    ),
+
+                    // Action Buttons
+                    if (schedule.status.toLowerCase() != 'cancelled' &&
+                        schedule.status.toLowerCase() != 'completed') ...[
+                      SizeBoxH(16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => _handleReschedule(context),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                    color: PColors.lightBlue, width: 1.5),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              child: Text(
+                                'Reschedule',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: PColors.primaryColor,
+                                ),
+                              ),
                             ),
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                            elevation: 0,
                           ),
-                          child: Text(
-                            'Cancel',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                          SizeBoxV(12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => _handleCancel(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: PColors.errorRed,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                      SizeBoxH(8),
+                      Text(
+                        '*Reschedule button will be enabled in few seconds',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: PColors.darkGray.withOpacity(0.5),
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ],
-                  ),
-                  SizeBoxH(8),
-                  Text(
-                    '*Reschedule button will be enabled in few seconds',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: PColors.darkGray.withOpacity(0.5),
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -305,9 +368,11 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, IconData icon, {bool isAddress = false}) {
+  Widget _buildDetailRow(String label, String value, IconData icon,
+      {bool isAddress = false}) {
     return Row(
-      crossAxisAlignment: isAddress ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+      crossAxisAlignment:
+          isAddress ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: [
         Text(
           '$label : ',
