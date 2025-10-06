@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fresh_fold/Settings/common/widgets/custom_outline_button.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../Settings/common/widgets/show_custom_dialog.dart';
 import '../../../../Settings/constants/sized_box.dart';
 import '../../../../Settings/utils/p_colors.dart';
 import '../../../auth/view_model.dart/auth_view_model.dart';
@@ -50,62 +52,140 @@ class OrderCard extends StatelessWidget {
         return schedule.status;
     }
   }
-void _handleReschedule(BuildContext context) {
-  final authProvider = Provider.of<AuthViewModel>(context, listen: false);
-  final userId = authProvider.currentUser?.uid;
-  
-  if (userId == null) return;
 
-  showDialog(
+  void _handleReschedule(BuildContext context) async {
+    final authProvider = Provider.of<AuthViewModel>(context, listen: false);
+    final userId = authProvider.currentUser?.uid;
+    final orderViewModel = context.read<OrderViewModel>();
+
+    if (userId == null) return;
+
+    // Step 1: Show Date Picker
+    final DateTime? newDate = await showDatePicker(
+      context: context,
+      initialDate: schedule.pickupDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 365)),
+    );
+
+    if (newDate == null) return; // User canceled date picker
+
+    // Step 2: Show Time Slot Picker (using a custom bottom sheet)
+    final String? newTimeSlot = await _showTimeSlotBottomSheet(context);
+
+    if (newTimeSlot == null) return; // User canceled time slot picker
+
+    // Step 3: Show Confirmation Dialog
+    final bool shouldProceed =
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Reschedule Order'),
+            content: Text(
+              'Are you sure you want to reschedule your pickup to:\n\n${DateFormat('dd-MM-yyyy').format(newDate)} at $newTimeSlot?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text('Confirm'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+
+    // Step 4: Proceed with Reschedule
+    if (shouldProceed && context.mounted) {
+      await orderViewModel.rescheduleOrder(
+        userId,
+        scheduleId,
+        newDate,
+        newTimeSlot,
+      );
+    }
+  }
+
+  // Helper function to show the time slot picker
+  Future<String?> _showTimeSlotBottomSheet(BuildContext context) {
+    final timeSlots = [
+      '9:00 AM - 11:00 AM',
+      '11:00 AM - 1:00 PM',
+      '1:00 PM - 3:00 PM',
+      '3:00 PM - 5:00 PM',
+      '5:00 PM - 7:00 PM',
+    ];
+
+    return showModalBottomSheet<String?>(
+      context: context,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Select a New Time Slot',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            ...timeSlots
+                .map(
+                  (slot) => ListTile(
+                    title: Text(slot),
+                    onTap: () => Navigator.of(context).pop(slot),
+                  ),
+                )
+                .toList(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleCancel(BuildContext context) {
+    final authProvider = Provider.of<AuthViewModel>(context, listen: false);
+    final userId = authProvider.currentUser?.uid;
+
+    if (userId == null) return;
+ showCustomDialog(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text('Reschedule Order'),
-      content: Text('Reschedule functionality for order $scheduleId'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            context.read<OrderViewModel>().rescheduleOrder(userId, scheduleId);
-            Navigator.pop(context);
-          },
-          child: Text('Confirm'),
-        ),
-      ],
-    ),
+    title: "Cancel Order",
+    content: "Are you sure you want to cancel this order?",
+    confirmText: "Yes, Cancel",
+    cancelText: "No",
+   
+    onConfirm: () async {
+      await context.read<OrderViewModel>().cancelOrder(userId, scheduleId);
+    },
   );
-}
-
-void _handleCancel(BuildContext context) {
-  final authProvider = Provider.of<AuthViewModel>(context, listen: false);
-  final userId = authProvider.currentUser?.uid;
-  
-  if (userId == null) return;
-
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text('Cancel Order'),
-      content: Text('Are you sure you want to cancel this order?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('No'),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: PColors.errorRed),
-          onPressed: () async {
-            await context.read<OrderViewModel>().cancelOrder(userId, scheduleId);
-            if (context.mounted) Navigator.pop(context);
-          },
-          child: Text('Yes, Cancel'),
-        ),
-      ],
-    ),
-  );
-}
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => AlertDialog(
+    //     title: Text('Cancel Order'),
+    //     content: Text('Are you sure you want to cancel this order?'),
+    //     actions: [
+    //       TextButton(
+    //         onPressed: () => Navigator.pop(context),
+    //         child: Text('No'),
+    //       ),
+    //       ElevatedButton(
+    //         style: ElevatedButton.styleFrom(backgroundColor: PColors.errorRed),
+    //         onPressed: () async {
+    //           await context.read<OrderViewModel>().cancelOrder(
+    //             userId,
+    //             scheduleId,
+    //           );
+    //           if (context.mounted) Navigator.pop(context);
+    //         },
+    //         child: Text('Yes, Cancel'),
+    //       ),
+    //     ],
+    //   ),
+    // );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +257,8 @@ void _handleCancel(BuildContext context) {
                     children: [
                       _buildProgressStep(true, Icons.person, 'Requested'),
                       _buildProgressLine(
-                          schedule.status.toLowerCase() == 'in_progress'),
+                        schedule.status.toLowerCase() == 'in_progress',
+                      ),
                       _buildProgressStep(
                         schedule.status.toLowerCase() == 'in_progress',
                         Icons.local_shipping,
@@ -211,11 +292,7 @@ void _handleCancel(BuildContext context) {
                       Icons.star_outline,
                     ),
                     SizeBoxH(12),
-                    _buildDetailRow(
-                      'Discount',
-                      'NA',
-                      Icons.discount,
-                    ),
+                    _buildDetailRow('Discount', 'NA', Icons.discount),
 
                     if (isExpanded) ...[
                       SizeBoxH(12),
@@ -273,46 +350,20 @@ void _handleCancel(BuildContext context) {
                       Row(
                         children: [
                           Expanded(
-                            child: OutlinedButton(
+                            child: CustomOutlineButton(
                               onPressed: () => _handleReschedule(context),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                    color: PColors.lightBlue, width: 1.5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: EdgeInsets.symmetric(vertical: 14),
-                              ),
-                              child: Text(
-                                'Reschedule',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: PColors.primaryColor,
-                                ),
-                              ),
+                              text: 'Reschedule',
+                              heigth: 50,
                             ),
                           ),
                           SizeBoxV(12),
                           Expanded(
-                            child: ElevatedButton(
+                            child: CustomOutlineButton(
+                              text: "Cancel",
+                              bordercolor: PColors.errorRed,
+                              textcolor: PColors.errorRed,
+                              heigth: 50,
                               onPressed: () => _handleCancel(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: PColors.errorRed,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: EdgeInsets.symmetric(vertical: 14),
-                                elevation: 0,
-                              ),
-                              child: Text(
-                                'Cancel',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
                             ),
                           ),
                         ],
@@ -368,11 +419,16 @@ void _handleCancel(BuildContext context) {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, IconData icon,
-      {bool isAddress = false}) {
+  Widget _buildDetailRow(
+    String label,
+    String value,
+    IconData icon, {
+    bool isAddress = false,
+  }) {
     return Row(
-      crossAxisAlignment:
-          isAddress ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+      crossAxisAlignment: isAddress
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.center,
       children: [
         Text(
           '$label : ',

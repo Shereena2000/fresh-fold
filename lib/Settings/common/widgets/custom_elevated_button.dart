@@ -15,6 +15,7 @@ class CustomElavatedTextButton extends StatelessWidget {
     this.textColor,
     this.icon,
     this.iconSpacing,
+        this.gradientColors
   });
 
   final void Function()? onPressed;
@@ -26,7 +27,7 @@ class CustomElavatedTextButton extends StatelessWidget {
   final Color? textColor;
   final Widget? icon;
   final double? iconSpacing;
-
+ final List<Color>? gradientColors;
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.sizeOf(context);
@@ -36,7 +37,8 @@ class CustomElavatedTextButton extends StatelessWidget {
       height: height ?? 60,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [PColors.primaryColor, PColors.secondoryColor],
+          colors: gradientColors ??
+              [PColors.primaryColor, PColors.secondoryColor],
         ),
         borderRadius: BorderRadius.circular(borderRadius ?? 16),
         boxShadow: [

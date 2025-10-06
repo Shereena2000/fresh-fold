@@ -4,6 +4,7 @@ import 'package:fresh_fold/Settings/constants/sized_box.dart';
 import 'package:fresh_fold/Settings/utils/p_colors.dart';
 import 'package:fresh_fold/Settings/utils/p_pages.dart';
 import 'package:provider/provider.dart';
+import '../../../Settings/common/widgets/show_custom_dialog.dart';
 import'../../auth/view_model.dart/auth_view_model.dart';
 import '../../wrapper/view_model/navigation_provider.dart';
 
@@ -49,7 +50,29 @@ class AccountScreen extends StatelessWidget {
               icon: Icons.logout,
               title: 'Logout',
               onTap: () {
-                _showLogoutDialog(context);
+                showCustomDialog(
+  context: context,
+  title: "Logout",
+  content: "Are you sure you want to log out?",
+  confirmText: "Logout",
+  cancelText: "Cancel",
+  onConfirm: () async {
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+
+    try {
+      await authViewModel.signOut();
+      Provider.of<NavigationProvider>(context, listen: false).resetIndex();
+      Navigator.pushReplacementNamed(context, "/login");
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Logout failed: $e")),
+        );
+      }
+    }
+  },
+);
+
               },
             ),
 
@@ -65,48 +88,7 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Logout"),
-        content: const Text("Are you sure you want to log out?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop(); // Close dialog
-
-              final authViewModel = Provider.of<AuthViewModel>(
-                context,
-                listen: false,
-              );
-
-              try {
-                await authViewModel.signOut();
-                Provider.of<NavigationProvider>(
-                  context,
-                  listen: false,
-                ).resetIndex();
-                // Navigate to login screen after successful logout
-                Navigator.pushReplacementNamed(context, "/login");
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text("Logout failed: $e")));
-                }
-              }
-            },
-            child: const Text("Logout"),
-          ),
-        ],
-      ),
-    );
-  }
+  
 
   Widget _buildMenuItem({
     required icon,

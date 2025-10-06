@@ -2,7 +2,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fresh_fold/Settings/utils/images.dart';
 import 'package:fresh_fold/Settings/utils/p_pages.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../../Settings/common/widgets/custom_elevated_button.dart';
 import '../../../Settings/constants/sized_box.dart';
@@ -238,13 +237,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildIconButton(IconData icon) {
-    return Container(
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: PColors.lightGray,
-        borderRadius: BorderRadius.circular(12),
+    return InkWell(
+      onTap: () => Navigator.pushNamed(context, PPages.notificationPageUi),
+      child: Container(
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: PColors.lightGray,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: PColors.primaryColor, size: 22),
       ),
-      child: Icon(icon, color: PColors.primaryColor, size: 22),
     );
   }
 

@@ -9,6 +9,7 @@ class CustomOutlineButton extends StatelessWidget {
   final double? heigth;
   final double? borderRaduis; final double? fontSize;
   final Color? bordercolor;
+  final Color? textcolor;
   final Color? forgcolor;
   final double? padverticle;
   final double? padhorizondal;
@@ -26,7 +27,7 @@ class CustomOutlineButton extends StatelessWidget {
     this.borderRaduis,
     this.padverticle,
     this.padhorizondal, this.fontSize,
-    this.prefixIcon,
+    this.prefixIcon, this.textcolor,
   });
 
   @override
@@ -43,7 +44,7 @@ class CustomOutlineButton extends StatelessWidget {
         maximumSize: Size(width ?? size.width - 32, heigth ?? 50),
         side: BorderSide(
           width: 1,
-          color: bordercolor ?? PColors.black,
+          color: bordercolor ?? PColors.primaryColor,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRaduis ?? 8),
@@ -66,7 +67,7 @@ class CustomOutlineButton extends StatelessWidget {
             text,
             style: getTextStyle(
               fontSize: fontSize ?? 16,
-              color: PColors.black,
+              color:textcolor?? PColors.primaryColor,
               fontWeight: FontWeight.w500,
             ),
           ),

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:fresh_fold/Features/auth/view/sigin.dart';
 import 'package:fresh_fold/Features/auth/view/sign_up.dart';
 import 'package:fresh_fold/Features/legal_info/privacy_policy/view/ui.dart';
-
 import '../../Features/auth/view/mobile_verification.dart';
 import '../../Features/auth/view/otp_verification.dart';
 import '../../Features/auth/view/registration.dart';
+import '../../Features/notification/view/ui.dart';
 import '../../Features/on_boarding/view/ui.dart';
 import '../../Features/pick_up_screen/view/ui.dart';
 import '../../Features/profile/view/ui.dart';
@@ -45,7 +45,8 @@ class Routes {
     case PPages.privacyPolicyUi:
         return MaterialPageRoute(builder: (context) => PrivacyPolicyScreen());
 
-
+    case PPages.notificationPageUi:
+        return MaterialPageRoute(builder: (context) => NotificationScreen());
 
 
 

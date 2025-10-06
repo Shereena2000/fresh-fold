@@ -92,15 +92,49 @@ class OrderViewModel extends ChangeNotifier {
   }
 
   /// Reschedule order
-  Future<void> rescheduleOrder(String userId, String scheduleId) async {
-    try {
-      // TODO: Navigate to schedule screen with pre-filled data
-      await fetchOrders(userId);
-    } catch (e) {
-      _errorMessage = 'Failed to reschedule: $e';
+ /// Reschedule order with new date and time
+Future<void> rescheduleOrder(
+  String userId, 
+  String scheduleId, 
+  DateTime newDate, 
+  String newTimeSlot
+) async {
+  try {
+    // 1. Find the existing schedule that needs to be updated
+    ScheduleModel? existingSchedule;
+    
+    // Search through all order lists to find the schedule
+    final allSchedules = [..._activePickups, ..._activeOrders, ..._completedOrders, ..._cancelledOrders];
+    existingSchedule = allSchedules.firstWhere(
+      (schedule) => schedule.scheduleId == scheduleId,
+    );
+
+    if (existingSchedule == null) {
+      _errorMessage = 'Order not found.';
       notifyListeners();
+      return;
     }
+
+    // 2. Create an updated schedule model with the new date and time
+    ScheduleModel updatedSchedule = existingSchedule.copyWith(
+      pickupDate: newDate,
+      timeSlot: newTimeSlot,
+      updatedAt: DateTime.now(), // Track when the reschedule happened
+      // Optionally, you can also reset the status here if needed, e.g.:
+      // status: 'rescheduled'
+    );
+
+    // 3. Call the repository to update the schedule in Firestore
+    await _repository.updateSchedule(updatedSchedule);
+
+    // 4. Refresh the orders list to reflect the changes
+    await fetchOrders(userId);
+
+  } catch (e) {
+    _errorMessage = 'Failed to reschedule: $e';
+    notifyListeners();
   }
+}
 
   /// Cancel order
   Future<void> cancelOrder(String userId, String scheduleId) async {
