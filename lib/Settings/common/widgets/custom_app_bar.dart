@@ -4,8 +4,9 @@ import '../../utils/p_text_styles.dart'; // if you want to style text
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+ final List<Widget>?actions;
 
-  const CustomAppBar({super.key, required this.title});
+  const CustomAppBar({super.key, required this.title,  this.actions});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +18,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: PColors.primaryColor,
       elevation: 4,
       centerTitle: false, // optional
+      actions: actions
     );
   }
 

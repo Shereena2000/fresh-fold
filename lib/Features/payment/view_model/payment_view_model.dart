@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../model/payment_model.dart' show PaymentModel, PaymentMethod, UpiApp;
 
 class PaymentViewModel extends ChangeNotifier {
-  PaymentModel _paymentModel = PaymentModel(totalAmount: 350);
+  PaymentModel _paymentModel = PaymentModel(totalAmount: 1);
 
   PaymentModel get paymentModel => _paymentModel;
 
@@ -29,15 +29,16 @@ class PaymentViewModel extends ChangeNotifier {
     switch (app) {
       case UpiApp.googlePay:
         packageName = 'com.google.android.apps.nbu.paisa.user';
-        upiUrl = 'tez://upi/pay?pa=merchant@upi&pn=FreshFold&am=350&cu=INR';
+        //upiUrl='test@upi';
+       upiUrl = 'tez://upi/pay?pa=merchant@upi&pn=FreshFold&am=1&cu=INR';
         break;
       case UpiApp.phonePe:
         packageName = 'com.phonepe.app';
-        upiUrl = 'phonepe://pay?pa=merchant@upi&pn=FreshFold&am=350&cu=INR';
+       upiUrl = 'phonepe://pay?pa=merchant@upi&pn=FreshFold&am=1&cu=INR';
         break;
       case UpiApp.paytm:
         packageName = 'net.one97.paytm';
-        upiUrl = 'paytmmp://pay?pa=merchant@upi&pn=FreshFold&am=350&cu=INR';
+        upiUrl = 'paytmmp://pay?pa=merchant@upi&pn=FreshFold&am=1&cu=INR';
         break;
     }
 

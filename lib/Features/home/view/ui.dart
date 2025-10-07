@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:fresh_fold/Settings/utils/images.dart';
 import 'package:fresh_fold/Settings/utils/p_pages.dart';
 
@@ -7,6 +8,8 @@ import '../../../Settings/common/widgets/custom_elevated_button.dart';
 import '../../../Settings/constants/sized_box.dart';
 import '../../../Settings/constants/text_styles.dart';
 import '../../../Settings/utils/p_colors.dart';
+import '../../notification/view_model/notification_view_model.dart';
+import '../../auth/view_model.dart/auth_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -85,9 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Row(
                       children: [
-                        _buildIconButton(Icons.notifications_outlined),
+                        _buildNotificationIconWithBadge(),
                         SizeBoxV(8),
-                      //  _buildIconButton(Icons.person_outline),
                       ],
                     ),
                   ],
@@ -127,52 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   (index) => _buildIndicator(index == _currentPage),
                 ),
               ),
-
-              // SizeBoxH(24),
-
-              // // Lottie Animation Section
-              // Container(
-              //   margin: EdgeInsets.symmetric(horizontal: 20),
-              //   padding: EdgeInsets.all(20),
-              //   decoration: BoxDecoration(
-              //     gradient: LinearGradient(
-              //       colors: [
-              //         PColors.primaryColor.withOpacity(0.1),
-              //         PColors.lightBlue.withOpacity(0.1),
-              //       ],
-              //     ),
-              //     borderRadius: BorderRadius.circular(24),
-              //   ),
-              //   child: Column(
-              //     children: [
-              //       Text(
-              //         'Professional Care',
-              //         style: getTextStyle(
-              //           fontSize: 22,
-              //           fontWeight: FontWeight.w700,
-              //           color: PColors.primaryColor,
-              //         ),
-              //       ),
-              //       SizeBoxH(8),
-              //       Text(
-              //         'We handle your clothes with love and care',
-              //         textAlign: TextAlign.center,
-              //         style: getTextStyle(
-              //           fontSize: 14,
-              //           fontWeight: FontWeight.w400,
-              //           color: PColors.darkGray.withOpacity(0.7),
-              //         ),
-              //       ),
-              //       Lottie.asset(
-              //         'assets/lottie/Launderer.json',
-              //         height: 200,
-              //         repeat: true,
-              //         reverse: false,
-              //         animate: true,
-              //       ),
-              //     ],
-              //   ),
-              // ),
 
               SizeBoxH(24),
 
@@ -236,6 +193,65 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildNotificationIconWithBadge() {
+    final authProvider = Provider.of<AuthViewModel>(context);
+    final userId = authProvider.currentUser?.uid;
+
+    if (userId == null) {
+      return _buildIconButton(Icons.notifications_outlined);
+    }
+
+    return Consumer<NotificationViewModel>(
+      builder: (context, notificationProvider, _) {
+        return StreamBuilder<int>(
+          stream: notificationProvider.streamUnreadCount(userId),
+          builder: (context, snapshot) {
+            final unreadCount = snapshot.data ?? 0;
+
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _buildIconButton(Icons.notifications_outlined),
+                if (unreadCount > 0)
+                  Positioned(
+                    right: 3,
+                    top: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(4),
+                      constraints: BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      decoration: BoxDecoration(
+                        color: PColors.primaryColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                       
+                      ),
+                      child: Center(
+                        child: Text(
+                          unreadCount > 99 ? '99+' : unreadCount.toString(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildIconButton(IconData icon) {
     return InkWell(
       onTap: () => Navigator.pushNamed(context, PPages.notificationPageUi),
@@ -252,9 +268,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPromoCard(String promo) {
     return Container(
-   width: double.infinity,
+      width: double.infinity,
       decoration: BoxDecoration(
-       
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -264,7 +279,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      child: Image.asset(promo)
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.asset(
+          promo,
+          fit: BoxFit.cover,
+        ),
+      ),
     );
   }
 
@@ -336,4 +357,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-

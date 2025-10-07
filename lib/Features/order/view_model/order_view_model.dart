@@ -136,7 +136,7 @@ Future<void> rescheduleOrder(
   }
 }
 
-  /// Cancel order
+  // Cancel order
   Future<void> cancelOrder(String userId, String scheduleId) async {
     try {
       await _repository.updateScheduleStatus(userId, scheduleId, 'cancelled');
@@ -146,10 +146,14 @@ Future<void> rescheduleOrder(
       notifyListeners();
     }
   }
-
+ 
   /// Clear error
   void clearError() {
     _errorMessage = null;
     notifyListeners();
   }
+
+
+
+
 }
