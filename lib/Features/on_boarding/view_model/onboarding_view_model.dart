@@ -38,7 +38,14 @@ class OnBoardingViewModel extends ChangeNotifier {
   void skipToEnd() {
     pageController.jumpToPage(pages.length - 1);
   }
-
+// Future<void> goToSelctRole(BuildContext context) async {
+//     // Mark onboarding as completed
+//     await PreferenceHelper.setOnboardingCompleted(true);
+    
+//     if (context.mounted) {
+//       Navigator.pushReplacementNamed(context, PPages.selectRolePageUi);
+//     }
+//   }
   Future<void> goToLogin(BuildContext context) async {
     // Mark onboarding as completed
     await PreferenceHelper.setOnboardingCompleted(true);

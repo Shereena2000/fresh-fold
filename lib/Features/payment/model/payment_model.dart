@@ -1,11 +1,12 @@
 enum PaymentMethod { upi, card, cod }
 
-enum UpiApp { googlePay, phonePe, paytm }
+// Renamed to avoid conflict with upi_india package
+enum UpiAppType { googlePay, phonePe, paytm }
 
 class PaymentModel {
   final double totalAmount;
   final PaymentMethod selectedMethod;
-  final UpiApp? selectedUpiApp;
+  final UpiAppType? selectedUpiApp;
   final bool showUpiOptions;
 
   PaymentModel({
@@ -18,7 +19,7 @@ class PaymentModel {
   PaymentModel copyWith({
     double? totalAmount,
     PaymentMethod? selectedMethod,
-    UpiApp? selectedUpiApp,
+    UpiAppType? selectedUpiApp,
     bool? showUpiOptions,
     bool clearUpiApp = false,
   }) {

@@ -37,9 +37,9 @@ class MyApp extends StatelessWidget {
         iconTheme: IconThemeData(color: PColors.white),
         useMaterial3: true,
         appBarTheme: AppBarTheme(
-          backgroundColor: PColors.color000000,
-          surfaceTintColor: PColors.color000000,
-          foregroundColor: PColors.white,
+          backgroundColor: PColors.colorFFFFFF,
+          surfaceTintColor: PColors.colorFFFFFF,
+          foregroundColor: PColors.black,
           centerTitle: false,
         ),
       ),

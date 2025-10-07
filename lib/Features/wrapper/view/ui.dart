@@ -19,7 +19,7 @@ class WrapperScreen extends StatelessWidget {
     HomeScreen(),
     PriceListScreen(),
     OrderScreen(),
-    PaymentScreen(),
+    PaymentSectionScreens(),
     AccountScreen(),
   ];
 
