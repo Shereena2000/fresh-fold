@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fresh_fold/Settings/utils/p_colors.dart';
 import 'widgets/payment_history_screen.dart';
-import 'widgets/payment_screen.dart';
+import 'widgets/invoice_screen.dart';
 
 class PaymentSectionScreens extends StatelessWidget {
   const PaymentSectionScreens({super.key});
@@ -20,13 +20,13 @@ class PaymentSectionScreens extends StatelessWidget {
             labelColor: PColors.secondoryColor,
             indicatorColor: PColors.secondoryColor,
             tabs: [
-              Tab(text: 'Payment Methods'),
-              Tab(text: 'Transaction History'),
+              Tab(text: 'Invoice'),
+              Tab(text: 'Payment History'),
             ],
           ),
         ),
         body: const TabBarView(
-          children: [PaymentScreen(), PaymentHistoryScreen()],
+          children: [InvoiceScreen(), PaymentHistoryScreen()],
         ),
       ),
     );

@@ -27,9 +27,9 @@ final double contentHPadding;
         children: [
           ButtonsTabBar(
             backgroundColor: PColors.primaryColor,
-            unselectedBackgroundColor: Colors.white,
+            unselectedBackgroundColor: Colors.transparent,
             unselectedLabelStyle: getTextStyle(
-              color: PColors.darkGray,
+              color: PColors.primaryColor,
               fontSize:fontSize?? 14,
             ),
             labelStyle: getTextStyle(color: Colors.white, fontSize:fontSize?? 14),
