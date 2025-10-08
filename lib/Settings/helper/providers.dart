@@ -8,6 +8,7 @@ import '../../Features/on_boarding/view_model/onboarding_view_model.dart';
 import '../../Features/order/view_model/order_view_model.dart';
 import '../../Features/payment/view_model/payment_view_model.dart';
 import '../../Features/pick_up_screen/view_model/location_view_model.dart';
+import '../../Features/price_list/view_model/price_view_model.dart';
 import '../../Features/wrapper/view_model/navigation_provider.dart';
 
 List<SingleChildWidget> providers = [
@@ -19,5 +20,8 @@ List<SingleChildWidget> providers = [
   ChangeNotifierProvider(create: (_) => OrderViewModel()),
   ChangeNotifierProvider(create: (_) => PaymentViewModel()),
    ChangeNotifierProvider(create: (_) => NotificationViewModel()),
-  
+     ChangeNotifierProvider(create: (_) =>   PriceViewModel()),
+
+
+
 ];

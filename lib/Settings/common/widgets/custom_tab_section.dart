@@ -35,9 +35,11 @@ final double contentHPadding;
             labelStyle: getTextStyle(color: Colors.white, fontSize:fontSize?? 14),
             borderWidth: 1.5,
             borderColor: PColors.primaryColor,
+            unselectedBorderColor: PColors.primaryColor,
             radius: 30,
 
             contentPadding:   EdgeInsets.symmetric(horizontal: contentHPadding),
+            
             tabs: tabTitles.map((title) => Tab(text: title)).toList(),
           ),
           Expanded(child: TabBarView(children: tabContents),),
