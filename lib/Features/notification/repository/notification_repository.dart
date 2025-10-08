@@ -47,15 +47,19 @@ class NotificationRepository {
 
   /// Stream notifications (real-time)
   Stream<List<NotificationModel>> streamUserNotifications(String userId) {
+    print('📱 Setting up notification stream for user: $userId');
     return _firestore
         .collection('users')
         .doc(userId)
         .collection('notifications')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => NotificationModel.fromMap(doc.data()))
-            .toList());
+        .map((snapshot) {
+          print('🔔 Notification stream update: ${snapshot.docs.length} notifications');
+          return snapshot.docs
+              .map((doc) => NotificationModel.fromMap(doc.data()))
+              .toList();
+        });
   }
 
   /// Mark notification as read

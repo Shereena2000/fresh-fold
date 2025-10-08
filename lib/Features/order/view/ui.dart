@@ -18,22 +18,44 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
+  String? userId;
+
   @override
   void initState() {
     super.initState();
-    // Fetch orders when screen loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authProvider = Provider.of<AuthViewModel>(context, listen: false);
-      final userId = authProvider.currentUser?.uid;
-      
-      if (userId != null) {
-        context.read<OrderViewModel>().fetchOrders(userId);
-      }
-    });
+    final authProvider = Provider.of<AuthViewModel>(context, listen: false);
+    userId = authProvider.currentUser?.uid;
+    
+    // Sync schedules to global collection on app start (to fix any missing documents)
+    if (userId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _syncSchedulesIfNeeded();
+      });
+    }
+  }
+
+  void _syncSchedulesIfNeeded() async {
+    try {
+      // Only sync if there are orders to avoid unnecessary calls
+      final orderProvider = Provider.of<OrderViewModel>(context, listen: false);
+      await orderProvider.syncAllSchedulesToGlobal(userId!);
+    } catch (e) {
+      // Silent fail - don't show error to user for background sync
+      print('Background sync failed: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (userId == null) {
+      return Scaffold(
+        appBar: const CustomAppBar(title: "Order"),
+        body: const Center(
+          child: Text('Please log in to view orders'),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: const CustomAppBar(title: "Order"),
       body: Consumer<OrderViewModel>(
@@ -62,21 +84,52 @@ class _OrderScreenState extends State<OrderScreen> {
               child: Column(
                 children: [
                   Expanded(
-                    child: CustomTabSection(
-                      contentHPadding: 10,
-                      fontSize: 12,
-                      tabTitles: const [
-                        "Active Pickup",
-                        "Active Order",
-                        "Completed",
-                        "Cancelled",
-                      ],
-                      tabContents: const [
-                        ActivePickup(),
-                        ActiveOrder(),
-                        Completed(),
-                        Cancelled(),
-                      ],
+                    child: StreamBuilder(
+                      stream: viewModel.streamOrders(userId!),
+                      builder: (context, snapshot) {
+                        // Only show loading on initial connection (when no data exists yet)
+                        if (snapshot.connectionState == ConnectionState.waiting && 
+                            !snapshot.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: PColors.primaryColor,
+                            ),
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Error: ${snapshot.error}',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          );
+                        }
+
+                        if (snapshot.hasData) {
+                          // Update view model with real-time data
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            viewModel.updateFromStream(snapshot.data!);
+                          });
+                        }
+
+                        return CustomTabSection(
+                          contentHPadding: 10,
+                          fontSize: 12,
+                          tabTitles: const [
+                            "Active Pickup",
+                            "Active Order",
+                            "Completed",
+                            "Cancelled",
+                          ],
+                          tabContents: const [
+                            ActivePickup(),
+                            ActiveOrder(),
+                            Completed(),
+                            Cancelled(),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],

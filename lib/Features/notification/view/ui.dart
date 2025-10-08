@@ -19,17 +19,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadNotifications();
+      _markAllAsRead();
     });
   }
 
-  void _loadNotifications() {
+  void _markAllAsRead() {
     final authProvider = Provider.of<AuthViewModel>(context, listen: false);
     final notificationProvider = Provider.of<NotificationViewModel>(context, listen: false);
     
     final userId = authProvider.currentUser?.uid;
     if (userId != null) {
-      notificationProvider.loadNotifications(userId);
+      // Mark all notifications as read when user navigates to notification screen
+      notificationProvider.markAllAsReadOnNavigate(userId);
     }
   }
 
@@ -98,7 +99,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 if (notificationProvider.errorMessage != null) {
                   return _buildErrorState(
                     notificationProvider.errorMessage!,
-                    () => _loadNotifications(),
+                    () {
+                      // Just refresh by rebuilding
+                      setState(() {});
+                    },
                   );
                 }
 
@@ -116,7 +120,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     if (snapshot.hasError) {
                       return _buildErrorState(
                         'Error loading notifications',
-                        () => _loadNotifications(),
+                        () {
+                          // Just refresh by rebuilding
+                          setState(() {});
+                        },
                       );
                     }
 
@@ -127,7 +134,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     }
 
                     return RefreshIndicator(
-                      onRefresh: () async => _loadNotifications(),
+                      onRefresh: () async {
+                        // Just refresh the stream by rebuilding
+                        setState(() {});
+                      },
                       color: PColors.primaryColor,
                       child: ListView.builder(
                         padding: EdgeInsets.all(16),
@@ -308,6 +318,11 @@ class NotificationCard extends StatelessWidget {
         return Icons.verified_rounded;
       case 'cancelled':
         return Icons.cancel_rounded;
+      case 'payment_request':
+      case 'pay_request':
+        return Icons.payment_rounded;
+      case 'paid':
+        return Icons.check_circle_rounded;
       default:
         return Icons.notifications_rounded;
     }

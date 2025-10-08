@@ -85,6 +85,11 @@ class NotificationModel {
         return "Order delivered! We hope you're happy with your fresh clothes.";
       case 'cancelled':
         return "Your order has been cancelled. Contact us if you need assistance.";
+      case 'payment_request':
+      case 'pay_request':
+        return "Payment request received! Please review.";
+      case 'paid':
+        return "Payment successful! Thank you for using FreshFold.";
       default:
         return "Status updated for your order.";
     }

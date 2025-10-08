@@ -126,9 +126,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       SizeBoxH(12),
                       _buildInfoCard(
-                        icon: Icons.location_city_outlined,
-                        label: 'City',
-                        value: user.city ?? 'Not specified',
+                        icon: Icons.location_on_outlined,
+                        label: 'Location',
+                        value: user.location ?? 'Not specified',
                         onTap: () {},
                       ),
                     ],

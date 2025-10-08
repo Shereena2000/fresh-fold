@@ -60,30 +60,64 @@ class OrderViewModel extends ChangeNotifier {
 
   /// Update orders from stream (real-time updates)
   void updateFromStream(List<ScheduleModel> schedules) {
+    // Prevent unnecessary updates if data hasn't changed
+    final allCurrentOrders = [
+      ..._activePickups,
+      ..._activeOrders,
+      ..._completedOrders,
+      ..._cancelledOrders
+    ];
+    
+    if (allCurrentOrders.length == schedules.length) {
+      bool hasChanged = false;
+      for (int i = 0; i < schedules.length; i++) {
+        if (i >= allCurrentOrders.length || 
+            schedules[i].scheduleId != allCurrentOrders[i].scheduleId ||
+            schedules[i].status != allCurrentOrders[i].status) {
+          hasChanged = true;
+          break;
+        }
+      }
+      if (!hasChanged) return;
+    }
+    
     _categorizeSchedules(schedules);
     notifyListeners();
   }
 
-  /// Categorize schedules into different lists
+  /// Categorize schedules into different lists based on status
   void _categorizeSchedules(List<ScheduleModel> allSchedules) {
+    print('🔄 Categorizing ${allSchedules.length} total schedules');
+    
+    // Active Pickup: pending only
     _activePickups = allSchedules.where((s) => 
-      s.status == 'pending' || s.status == 'pickup_requested'
+      s.status.toLowerCase() == 'pending'
     ).toList();
+    print('📦 Active Pickups (pending): ${_activePickups.length}');
 
+    // Active Orders: confirmed, picked_up, processing, ready, delivered
     _activeOrders = allSchedules.where((s) => 
-      s.status == 'confirmed' || 
-      s.status == 'picked_up' || 
-      s.status == 'processing' || 
-      s.status == 'ready'
+      s.status.toLowerCase() == 'confirmed' || 
+      s.status.toLowerCase() == 'picked_up' || 
+      s.status.toLowerCase() == 'processing' || 
+      s.status.toLowerCase() == 'ready' ||
+      s.status.toLowerCase() == 'delivered'
     ).toList();
+    print('📋 Active Orders (confirmed/picked_up/processing/ready/delivered): ${_activeOrders.length}');
 
+    // Completed: paid only
     _completedOrders = allSchedules.where((s) => 
-      s.status == 'delivered' || s.status == 'completed'
+      s.status.toLowerCase() == 'paid'
     ).toList();
+    print('✅ Completed (paid): ${_completedOrders.length}');
 
+    // Cancelled: cancelled only
     _cancelledOrders = allSchedules.where((s) => 
-      s.status == 'cancelled'
+      s.status.toLowerCase() == 'cancelled'
     ).toList();
+    print('❌ Cancelled: ${_cancelledOrders.length}');
+    
+    print('📊 Final counts - Active Pickups: ${_activePickups.length}, Active Orders: ${_activeOrders.length}, Completed: ${_completedOrders.length}, Cancelled: ${_cancelledOrders.length}');
   }
 
   /// Stream orders for real-time updates
@@ -91,52 +125,42 @@ class OrderViewModel extends ChangeNotifier {
     return _repository.streamUserSchedules(userId);
   }
 
-  /// Reschedule order
- /// Reschedule order with new date and time
-Future<void> rescheduleOrder(
-  String userId, 
-  String scheduleId, 
-  DateTime newDate, 
-  String newTimeSlot
-) async {
-  try {
-    // 1. Find the existing schedule that needs to be updated
-    ScheduleModel? existingSchedule;
-    
-    // Search through all order lists to find the schedule
-    final allSchedules = [..._activePickups, ..._activeOrders, ..._completedOrders, ..._cancelledOrders];
-    existingSchedule = allSchedules.firstWhere(
-      (schedule) => schedule.scheduleId == scheduleId,
-    );
+  /// Reschedule order with new date and time
+  Future<void> rescheduleOrder(
+    String userId, 
+    String scheduleId, 
+    DateTime newDate, 
+    String newTimeSlot
+  ) async {
+    try {
+      // Find the existing schedule
+      ScheduleModel? existingSchedule;
+      
+      final allSchedules = [..._activePickups, ..._activeOrders, ..._completedOrders, ..._cancelledOrders];
+      existingSchedule = allSchedules.firstWhere(
+        (schedule) => schedule.scheduleId == scheduleId,
+      );
 
-    if (existingSchedule == null) {
-      _errorMessage = 'Order not found.';
+      // Create updated schedule
+      ScheduleModel updatedSchedule = existingSchedule.copyWith(
+        pickupDate: newDate,
+        timeSlot: newTimeSlot,
+        updatedAt: DateTime.now(),
+      );
+
+      // Update in Firestore
+      await _repository.updateSchedule(updatedSchedule);
+
+      // Refresh orders
+      await fetchOrders(userId);
+
+    } catch (e) {
+      _errorMessage = 'Failed to reschedule: $e';
       notifyListeners();
-      return;
     }
-
-    // 2. Create an updated schedule model with the new date and time
-    ScheduleModel updatedSchedule = existingSchedule.copyWith(
-      pickupDate: newDate,
-      timeSlot: newTimeSlot,
-      updatedAt: DateTime.now(), // Track when the reschedule happened
-      // Optionally, you can also reset the status here if needed, e.g.:
-      // status: 'rescheduled'
-    );
-
-    // 3. Call the repository to update the schedule in Firestore
-    await _repository.updateSchedule(updatedSchedule);
-
-    // 4. Refresh the orders list to reflect the changes
-    await fetchOrders(userId);
-
-  } catch (e) {
-    _errorMessage = 'Failed to reschedule: $e';
-    notifyListeners();
   }
-}
 
-  // Cancel order
+  /// Cancel order
   Future<void> cancelOrder(String userId, String scheduleId) async {
     try {
       await _repository.updateScheduleStatus(userId, scheduleId, 'cancelled');
@@ -146,14 +170,23 @@ Future<void> rescheduleOrder(
       notifyListeners();
     }
   }
+
+  /// Sync all user schedules to global collection (for fixing sync issues)
+  Future<void> syncAllSchedulesToGlobal(String userId) async {
+    try {
+      // Import the schedule repository to access sync method
+      final scheduleRepository = ScheduleRepository();
+      await scheduleRepository.syncUserSchedulesToGlobal(userId);
+      await fetchOrders(userId); // Refresh the orders list
+    } catch (e) {
+      _errorMessage = 'Failed to sync schedules: $e';
+      notifyListeners();
+    }
+  }
  
   /// Clear error
   void clearError() {
     _errorMessage = null;
     notifyListeners();
   }
-
-
-
-
 }

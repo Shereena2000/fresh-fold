@@ -75,7 +75,14 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             );
           }
 
-          if (viewModel.paymentRequests.isEmpty) {
+          // Filter out paid and cancelled payment requests
+          final pendingPayments = viewModel.paymentRequests
+              .where((billing) => 
+                  billing.paymentStatus.toLowerCase() != 'paid' && 
+                  billing.paymentStatus.toLowerCase() != 'cancelled')
+              .toList();
+
+          if (pendingPayments.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -94,7 +101,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Your payment requests will appear here',
+                    'Your pending payment requests will appear here',
                     style: TextStyle(color: Colors.grey[500]),
                   ),
                 ],
@@ -106,9 +113,9 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             onRefresh: () => viewModel.loadPaymentRequests(userId!),
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: viewModel.paymentRequests.length,
+              itemCount: pendingPayments.length,
               itemBuilder: (context, index) {
-                final billing = viewModel.paymentRequests[index];
+                final billing = pendingPayments[index];
                 return _buildInvoiceCard(context, billing, viewModel);
               },
             ),

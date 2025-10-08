@@ -19,7 +19,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   
   late TextEditingController _fullNameController;
   late TextEditingController _emailController;
-  late TextEditingController _cityController;
+  late TextEditingController _locationController;
   late TextEditingController _professionController;
   late TextEditingController _alternativePhoneController;
   
@@ -34,7 +34,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     _fullNameController = TextEditingController(text: user?.fullName);
     _emailController = TextEditingController(text: user?.email);
-    _cityController = TextEditingController(text: user?.city);
+    _locationController = TextEditingController(text: user?.location);
     _professionController = TextEditingController(text: user?.profession);
     _alternativePhoneController = TextEditingController(text: user?.alternativePhone);
     _selectedGender = user?.gender;
@@ -45,7 +45,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
-    _cityController.dispose();
+    _locationController.dispose();
     _professionController.dispose();
     _alternativePhoneController.dispose();
     super.dispose();
@@ -96,11 +96,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   SizeBoxH(16),
 
-                  // City
+                  // Location
                   CustomTextFeild(
-                    controller: _cityController,
-                    hintText: "City",
-                    prefixIcon: Icon(Icons.location_city_outlined),
+                    controller: _locationController,
+                    hintText: "Location",
+                    prefixIcon: Icon(Icons.location_on_outlined),
                   ),
                   SizeBoxH(16),
 
@@ -221,7 +221,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final success = await authProvider.updateProfile(
         fullName: _fullNameController.text.trim(),
         email: _emailController.text.trim(),
-        city: _cityController.text.trim(),
+        location: _locationController.text.trim(),
         profession: _professionController.text.trim(),
         alternativePhone: _alternativePhoneController.text.trim(),
         gender: _selectedGender,

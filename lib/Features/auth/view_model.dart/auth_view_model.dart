@@ -526,7 +526,6 @@ Future<bool> updateProfile({
   String? gender,
   DateTime? dateOfBirth,
   String? profession,
-  String? city,
   String? alternativePhone,
 }) async {
   User? firebaseUser = _repository.getCurrentFirebaseUser();
@@ -548,7 +547,6 @@ Future<bool> updateProfile({
       gender: gender ?? _currentUser!.gender,
       dateOfBirth: dateOfBirth ?? _currentUser!.dateOfBirth,
       profession: profession ?? _currentUser!.profession,
-      city: city ?? _currentUser!.city,
       alternativePhone: alternativePhone ?? _currentUser!.alternativePhone,
       updatedAt: DateTime.now(),
     );

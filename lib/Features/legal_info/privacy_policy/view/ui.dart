@@ -69,7 +69,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           '• Name and email address\n'
           '• Phone number\n'
           '• Account credentials (username and password)\n'
-          '• Profile information (gender, date of birth, profession, city)\n'
+          '• Profile information (gender, date of birth, profession, location)\n'
           '• Alternative contact numbers',
           style: TextStyle(fontSize: 14, height: 1.5),
         ),

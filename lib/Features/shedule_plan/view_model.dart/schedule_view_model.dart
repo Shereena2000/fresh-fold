@@ -299,6 +299,28 @@ Future<bool> deleteSchedule(String userId, String scheduleId) async {
     return _repository.streamUserSchedules(userId);
   }
 
+  // ==================== SYNC TO GLOBAL COLLECTION ====================
+
+  /// Sync user's schedules to global collection (for migration/fixing sync issues)
+  Future<bool> syncSchedulesToGlobal(String userId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.syncUserSchedulesToGlobal(userId);
+      _successMessage = 'Schedules synced successfully';
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to sync schedules: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   // ==================== UTILITY METHODS ====================
 
   void clearError() {

@@ -20,7 +20,14 @@ class ScheduleRepository {
         scheduleId: docRef.id,
       );
       
+      // Store in user's subcollection
       await docRef.set(updatedSchedule.toMap());
+      
+      // ALSO store in global schedules collection for shopkeeper access
+      await _firestore
+          .collection('schedules')
+          .doc(docRef.id)
+          .set(updatedSchedule.toMap());
       
       // Create initial notification
       await _createNotification(
@@ -38,15 +45,57 @@ class ScheduleRepository {
   /// Update schedule status with notification
   Future<void> updateScheduleStatus(String userId, String scheduleId, String status) async {
     try {
+      final updateData = {
+        'status': status,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      
+      // Update in user's subcollection
       await _firestore
           .collection('users')
           .doc(userId)
           .collection('schedules')
           .doc(scheduleId)
-          .update({
-        'status': status,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+          .update(updateData);
+
+      // ALSO update in global schedules collection for shopkeeper
+      // If document doesn't exist in global collection, create it first
+      try {
+        await _firestore
+            .collection('schedules')
+            .doc(scheduleId)
+            .update(updateData);
+      } catch (globalUpdateError) {
+        // If global document doesn't exist, get the full document from user's collection and create it
+        if (globalUpdateError.toString().contains('not-found')) {
+          print('⚠️ Global schedule document not found, creating it...');
+          
+          // Get the full schedule from user's collection
+          DocumentSnapshot userDoc = await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('schedules')
+              .doc(scheduleId)
+              .get();
+          
+          if (userDoc.exists) {
+            // Create the document in global collection with updated status
+            Map<String, dynamic> scheduleData = userDoc.data() as Map<String, dynamic>;
+            scheduleData['status'] = status;
+            scheduleData['updatedAt'] = FieldValue.serverTimestamp();
+            
+            await _firestore
+                .collection('schedules')
+                .doc(scheduleId)
+                .set(scheduleData);
+            
+            print('✅ Created missing global schedule document for $scheduleId');
+          }
+        } else {
+          // Re-throw if it's a different error
+          throw globalUpdateError;
+        }
+      }
 
       // Create notification for status change
       await _createNotification(
@@ -130,12 +179,22 @@ class ScheduleRepository {
   /// Update entire schedule
   Future<void> updateSchedule(ScheduleModel schedule) async {
     try {
+      final updatedSchedule = schedule.copyWith(updatedAt: DateTime.now());
+      final scheduleMap = updatedSchedule.toMap();
+      
+      // Update in user's subcollection
       await _firestore
           .collection('users')
           .doc(schedule.userId)
           .collection('schedules')
           .doc(schedule.scheduleId)
-          .update(schedule.copyWith(updatedAt: DateTime.now()).toMap());
+          .update(scheduleMap);
+      
+      // ALSO update in global schedules collection for shopkeeper
+      await _firestore
+          .collection('schedules')
+          .doc(schedule.scheduleId)
+          .update(scheduleMap);
     } catch (e) {
       throw Exception('Failed to update schedule: $e');
     }
@@ -144,9 +203,16 @@ class ScheduleRepository {
   /// Delete schedule
   Future<void> deleteSchedule(String userId, String scheduleId) async {
     try {
+      // Delete from user's subcollection
       await _firestore
           .collection('users')
           .doc(userId)
+          .collection('schedules')
+          .doc(scheduleId)
+          .delete();
+      
+      // ALSO delete from global schedules collection
+      await _firestore
           .collection('schedules')
           .doc(scheduleId)
           .delete();
@@ -228,6 +294,35 @@ class ScheduleRepository {
           .toList();
     } catch (e) {
       throw Exception('Failed to get schedule history: $e');
+    }
+  }
+
+  /// Helper method to sync user's schedules to global collection
+  /// This is useful for migrating existing schedules
+  Future<void> syncUserSchedulesToGlobal(String userId) async {
+    try {
+      // Get all schedules from user's subcollection
+      QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('schedules')
+          .get();
+
+      // Sync each schedule to global collection
+      WriteBatch batch = _firestore.batch();
+      
+      for (var doc in snapshot.docs) {
+        batch.set(
+          _firestore.collection('schedules').doc(doc.id),
+          doc.data(),
+        );
+      }
+
+      await batch.commit();
+      print('✅ Synced ${snapshot.docs.length} schedules to global collection for user $userId');
+    } catch (e) {
+      print('❌ Failed to sync schedules: $e');
+      throw Exception('Failed to sync schedules: $e');
     }
   }
 }

@@ -78,6 +78,21 @@ class NotificationViewModel extends ChangeNotifier {
     }
   }
 
+  // Mark all as read on navigation (silent, without showing errors)
+  Future<void> markAllAsReadOnNavigate(String userId) async {
+    try {
+      await _repository.markAllAsRead(userId);
+      
+      // Update local list
+      _notifications = _notifications.map((n) => n.copyWith(isRead: true)).toList();
+      _unreadCount = 0;
+      notifyListeners();
+    } catch (e) {
+      // Silent error - don't show error message on navigation
+      print('Failed to mark all as read on navigate: ${e.toString()}');
+    }
+  }
+
   // ==================== DELETE NOTIFICATIONS ====================
 
   Future<void> deleteNotification(String userId, String notificationId) async {

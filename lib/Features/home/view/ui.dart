@@ -10,6 +10,7 @@ import '../../../Settings/constants/text_styles.dart';
 import '../../../Settings/utils/p_colors.dart';
 import '../../notification/view_model/notification_view_model.dart';
 import '../../auth/view_model.dart/auth_view_model.dart';
+import '../../payment/view_model/payment_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,6 +30,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _startAutoScroll();
+    
+    // Setup payment notification listener after widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setupPaymentNotifications();
+    });
+  }
+
+  void _setupPaymentNotifications() {
+    final authProvider = Provider.of<AuthViewModel>(context, listen: false);
+    final paymentProvider = Provider.of<PaymentViewModel>(context, listen: false);
+    
+    final userId = authProvider.currentUser?.uid;
+    if (userId != null) {
+      paymentProvider.setupPaymentNotifications(userId);
+    }
   }
 
   void _startAutoScroll() {

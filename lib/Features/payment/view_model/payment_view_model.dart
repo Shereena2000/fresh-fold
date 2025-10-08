@@ -10,6 +10,7 @@ class PaymentViewModel extends ChangeNotifier {
   OrderBillingModel? _currentBilling;
   bool _isLoading = false;
   String? _errorMessage;
+  String? _lastListenedUserId;
 
   List<OrderBillingModel> get paymentRequests => _paymentRequests;
   OrderBillingModel? get currentBilling => _currentBilling;
@@ -53,6 +54,21 @@ class PaymentViewModel extends ChangeNotifier {
   // Stream all payment requests for a user
   Stream<List<OrderBillingModel>> streamPaymentRequests(String userId) {
     return _repository.streamAllPaymentRequests(userId);
+  }
+
+  // Setup payment request notifications listener
+  void setupPaymentNotifications(String userId) {
+    // Avoid setting up multiple listeners for the same user
+    if (_lastListenedUserId == userId) {
+      return;
+    }
+    _lastListenedUserId = userId;
+    _repository.setupPaymentRequestListener(userId);
+  }
+
+  // Cleanup listener when user logs out
+  void cleanupListeners() {
+    _lastListenedUserId = null;
   }
 
   // Stream a specific billing detail
@@ -110,6 +126,7 @@ class PaymentViewModel extends ChangeNotifier {
       case 'paid':
         return Colors.green;
       case 'pay_request':
+      case 'payment_request':
         return Colors.orange;
       case 'pending':
         return Colors.blue;
