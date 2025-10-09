@@ -45,6 +45,8 @@ class ScheduleRepository {
   /// Update schedule status with notification
   Future<void> updateScheduleStatus(String userId, String scheduleId, String status) async {
     try {
+      print('📝 Updating schedule status - userId: $userId, scheduleId: $scheduleId, status: $status');
+      
       final updateData = {
         'status': status,
         'updatedAt': FieldValue.serverTimestamp(),
@@ -57,6 +59,8 @@ class ScheduleRepository {
           .collection('schedules')
           .doc(scheduleId)
           .update(updateData);
+      
+      print('✅ Schedule updated in user collection');
 
       // ALSO update in global schedules collection for shopkeeper
       // If document doesn't exist in global collection, create it first
@@ -108,13 +112,15 @@ class ScheduleRepository {
     }
   }
 
-  /// Private method to create notification
+  /// Simple method to create notification (avoids duplicates)
   Future<void> _createNotification({
     required String userId,
     required String scheduleId,
     required String status,
   }) async {
     try {
+      print('🔔 Creating notification - userId: $userId, scheduleId: $scheduleId, status: $status');
+      
       CollectionReference notificationsRef = _firestore
           .collection('users')
           .doc(userId)
@@ -133,9 +139,9 @@ class ScheduleRepository {
       );
       
       await docRef.set(notification.toMap());
+      print('✅ Notification created successfully: ${notification.message}');
     } catch (e) {
-      // Don't throw exception, just log it
-      print('Failed to create notification: $e');
+      print('❌ Failed to create notification: $e');
     }
   }
 

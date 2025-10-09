@@ -311,9 +311,7 @@ class NotificationCard extends StatelessWidget {
       case 'processing':
         return Icons.local_laundry_service_rounded;
       case 'ready':
-        return Icons.iron_rounded;
-      case 'delivery_scheduled':
-        return Icons.celebration_rounded;
+        return Icons.check_circle_outline_rounded;
       case 'delivered':
         return Icons.verified_rounded;
       case 'cancelled':

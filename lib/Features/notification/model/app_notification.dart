@@ -78,9 +78,7 @@ class NotificationModel {
       case 'processing':
         return "Your laundry is being washed and processed with care.";
       case 'ready':
-        return "Your clothes are ready for delivery! Please schedule a delivery time.";
-      case 'delivery_scheduled':
-        return "Your delivery has been scheduled. We'll deliver soon!";
+        return "Your clothes are ready for delivery!";
       case 'delivered':
         return "Order delivered! We hope you're happy with your fresh clothes.";
       case 'cancelled':

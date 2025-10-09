@@ -10,8 +10,8 @@ import '../../../Settings/constants/sized_box.dart';
 import '../../../Settings/constants/text_styles.dart';
 import '../../../Settings/utils/p_colors.dart';
 import '../../notification/view_model/notification_view_model.dart';
+import '../../notification/service/notification_listener_service.dart';
 import '../../auth/view_model.dart/auth_view_model.dart';
-import '../../payment/view_model/payment_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,27 +24,29 @@ class _HomeScreenState extends State<HomeScreen> {
   
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  final NotificationListenerService _notificationListener = NotificationListenerService();
 
   final List<String> promos = [Images.promo_1, Images.promo_2, Images.promo_3];
-final String supportPhoneNumber = '+1234567890';
+  final String supportPhoneNumber = '+1234567890';
+  
   @override
   void initState() {
     super.initState();
     _startAutoScroll();
     
-    // Setup payment notification listener after widget is built
+    // Start listening for schedule status changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setupPaymentNotifications();
+      _setupNotificationListener();
     });
   }
 
-  void _setupPaymentNotifications() {
+  void _setupNotificationListener() {
     final authProvider = Provider.of<AuthViewModel>(context, listen: false);
-    final paymentProvider = Provider.of<PaymentViewModel>(context, listen: false);
-    
     final userId = authProvider.currentUser?.uid;
+    
     if (userId != null) {
-      paymentProvider.setupPaymentNotifications(userId);
+      print('🎯 Setting up notification listener for user: $userId');
+      _notificationListener.startListening(userId);
     }
   }
 
