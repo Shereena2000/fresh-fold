@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fresh_fold/Settings/utils/p_pages.dart';
 import 'package:provider/provider.dart';
 import '../../../Settings/constants/sized_box.dart';
 import '../../../Settings/constants/text_styles.dart';
@@ -688,71 +689,75 @@ class _ScheduleWashScreenState extends State<ScheduleWashScreen> {
   }
 
   Widget _buildGetRateCard() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            PColors.lightBlue.withOpacity(0.3),
-            PColors.primaryColor.withOpacity(0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: PColors.lightBlue, width: 1.5),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            // Handle get rate card - navigate to rate card screen
-          },
+    return InkWell(
+      onTap: ()=>Navigator.pushNamed(context, PPages.priceListPageUi),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              PColors.lightBlue.withOpacity(0.3),
+              PColors.primaryColor.withOpacity(0.1),
+            ],
+          ),
           borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: PColors.lightBlue, width: 1.5),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.pushNamed(context, PPages.priceListPageUi);
+              // Handle get rate card - navigate to rate card screen
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.receipt_long,
+                      color: PColors.primaryColor,
+                      size: 24,
+                    ),
                   ),
-                  child: Icon(
-                    Icons.receipt_long,
+                  SizeBoxV(16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'View Price List',
+                          style: getTextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: PColors.primaryColor,
+                          ),
+                        ),
+                        SizeBoxH(4),
+                        Text(
+                          'Check our complete rate card',
+                          style: getTextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: PColors.darkGray.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
                     color: PColors.primaryColor,
-                    size: 24,
+                    size: 18,
                   ),
-                ),
-                SizeBoxV(16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'View Price List',
-                        style: getTextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: PColors.primaryColor,
-                        ),
-                      ),
-                      SizeBoxH(4),
-                      Text(
-                        'Check our complete rate card',
-                        style: getTextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: PColors.darkGray.withOpacity(0.6),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: PColors.primaryColor,
-                  size: 18,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

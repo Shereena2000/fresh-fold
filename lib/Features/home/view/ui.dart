@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fresh_fold/Settings/utils/images.dart';
 import 'package:fresh_fold/Settings/utils/p_pages.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../Settings/common/widgets/custom_elevated_button.dart';
 import '../../../Settings/constants/sized_box.dart';
@@ -25,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentPage = 0;
 
   final List<String> promos = [Images.promo_1, Images.promo_2, Images.promo_3];
-
+final String supportPhoneNumber = '+1234567890';
   @override
   void initState() {
     super.initState();
@@ -59,6 +60,39 @@ class _HomeScreenState extends State<HomeScreen> {
         _startAutoScroll();
       }
     });
+  }
+ // Method to make phone call
+  Future<void> _makePhoneCall() async {
+    final Uri phoneUri = Uri(
+      scheme: 'tel',
+      path: supportPhoneNumber,
+    );
+
+    try {
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri);
+      } else {
+        // Show error if phone app cannot be launched
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Could not launch phone dialer'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Handle any errors
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -107,6 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         _buildNotificationIconWithBadge(),
                         SizeBoxV(8),
+                         _buildIconButton(Icons.phone,_makePhoneCall)
                       ],
                     ),
                   ],
@@ -214,7 +249,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final userId = authProvider.currentUser?.uid;
 
     if (userId == null) {
-      return _buildIconButton(Icons.notifications_outlined);
+      return _buildIconButton(Icons.notifications_outlined, () => Navigator.pushNamed(context, PPages.notificationPageUi),);
+      
     }
 
     return Consumer<NotificationViewModel>(
@@ -227,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return Stack(
               clipBehavior: Clip.none,
               children: [
-                _buildIconButton(Icons.notifications_outlined),
+                _buildIconButton(Icons.notifications_outlined, () => Navigator.pushNamed(context, PPages.notificationPageUi),),
                 if (unreadCount > 0)
                   Positioned(
                     right: 3,
@@ -268,9 +304,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildIconButton(IconData icon) {
+  Widget _buildIconButton(IconData icon,VoidCallback onTap)  {
     return InkWell(
-      onTap: () => Navigator.pushNamed(context, PPages.notificationPageUi),
+      onTap:onTap,
       child: Container(
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(

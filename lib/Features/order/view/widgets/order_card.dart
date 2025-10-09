@@ -20,6 +20,14 @@ class OrderCard extends StatelessWidget {
     required this.scheduleId,
   });
 
+  // Check if reschedule button should be shown (only for pending/confirmed status)
+  bool _shouldShowRescheduleButton() {
+    final status = schedule.status.toLowerCase();
+    return status == 'pending' || 
+           status == 'pickup_requested' || 
+           status == 'confirmed';
+  }
+
   Color _getStatusColor() {
     switch (schedule.status.toLowerCase()) {
       case 'completed':
@@ -30,6 +38,7 @@ class OrderCard extends StatelessWidget {
         return Colors.orange;
       case 'pending':
       case 'pickup_requested':
+      case 'confirmed':
         return PColors.lightBlue;
       default:
         return PColors.primaryColor;
@@ -42,6 +51,8 @@ class OrderCard extends StatelessWidget {
         return 'Pickup Requested';
       case 'pickup_requested':
         return 'Pickup Requested';
+      case 'confirmed':
+        return 'Confirmed';
       case 'in_progress':
         return 'In Progress';
       case 'completed':
@@ -343,9 +354,8 @@ class OrderCard extends StatelessWidget {
                       ),
                     ),
 
-                    // Action Buttons
-                    if (schedule.status.toLowerCase() != 'cancelled' &&
-                        schedule.status.toLowerCase() != 'completed') ...[
+                    // Action Buttons - only show for pending/confirmed status
+                    if (_shouldShowRescheduleButton()) ...[
                       SizeBoxH(16),
                       Row(
                         children: [

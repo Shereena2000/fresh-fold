@@ -204,6 +204,8 @@ class AuthViewModel extends ChangeNotifier {
 
   /// Send password reset email
   Future<bool> sendPasswordResetEmail(String email) async {
+    print('🔐 Attempting to send password reset email to: $email');
+    
     if (email.isEmpty) {
       _errorMessage = 'Please enter your email address';
       notifyListeners();
@@ -216,11 +218,21 @@ class AuthViewModel extends ChangeNotifier {
       return false;
     }
 
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
     try {
+      print('📧 Sending password reset email...');
       await _repository.sendPasswordResetEmail(email);
+      print('✅ Password reset email sent successfully');
+      _isLoading = false;
+      notifyListeners();
       return true;
     } catch (e) {
+      print('❌ Failed to send password reset email: $e');
       _errorMessage = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
@@ -275,8 +287,16 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<bool> sendOTP() async {
-    if (phoneController.text.isEmpty || phoneController.text.length != 10) {
-      _errorMessage = 'Please enter valid 10 digit phone number';
+    if (phoneController.text.isEmpty) {
+      _errorMessage = 'Please enter your mobile number';
+      notifyListeners();
+      return false;
+    }
+
+    // Check if it has exactly 10 digits
+    String cleanPhone = phoneController.text.trim().replaceAll(' ', '');
+    if (cleanPhone.length != 10 || !RegExp(r'^\d{10}$').hasMatch(cleanPhone)) {
+      _errorMessage = 'Mobile number must be exactly 10 digits';
       notifyListeners();
       return false;
     }
@@ -444,10 +464,17 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<bool> registerUser() async {
+    // Validate phone number - check if not empty and has 10 digits
+    if (phoneController.text.isEmpty) {
+      _errorMessage = 'Please enter your mobile number';
+      notifyListeners();
+      return false;
+    }
 
-
-    if (emailController.text.isEmpty) {
-      _errorMessage = 'Please enter your email';
+    // Remove any spaces and check if it has exactly 10 digits
+    String cleanPhone = phoneController.text.trim().replaceAll(' ', '');
+    if (cleanPhone.length != 10 || !RegExp(r'^\d{10}$').hasMatch(cleanPhone)) {
+      _errorMessage = 'Mobile number must be exactly 10 digits';
       notifyListeners();
       return false;
     }
@@ -533,6 +560,16 @@ Future<bool> updateProfile({
     _errorMessage = 'User not authenticated';
     notifyListeners();
     return false;
+  }
+
+  // Validate alternative phone number if provided (not empty)
+  if (alternativePhone != null && alternativePhone.trim().isNotEmpty) {
+    String cleanPhone = alternativePhone.trim().replaceAll(' ', '');
+    if (cleanPhone.length != 10 || !RegExp(r'^\d{10}$').hasMatch(cleanPhone)) {
+      _errorMessage = 'Alternative phone number must be exactly 10 digits';
+      notifyListeners();
+      return false;
+    }
   }
 
   _isLoading = true;

@@ -48,9 +48,15 @@ class AuthRepository {
   /// Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     try {
+      print('📧 Firebase: Sending password reset email to: $email');
       await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
+      print('✅ Firebase: Password reset email sent successfully');
     } on FirebaseAuthException catch (e) {
+      print('❌ Firebase Auth Error: ${e.code} - ${e.message}');
       throw _handleAuthException(e);
+    } catch (e) {
+      print('❌ General Error: $e');
+      throw Exception('Failed to send password reset email: $e');
     }
   }
 
@@ -82,7 +88,7 @@ class AuthRepository {
       case 'invalid-email':
         return 'The email address is invalid.';
       case 'user-not-found':
-        return 'No account found with this email.';
+        return 'No account found with this email. Please check your email address or create a new account.';
       case 'wrong-password':
         return 'Incorrect password. Please try again.';
       case 'user-disabled':
@@ -90,9 +96,11 @@ class AuthRepository {
       case 'too-many-requests':
         return 'Too many attempts. Please try again later.';
       case 'operation-not-allowed':
-        return 'Email/password sign-in is not enabled.';
+        return 'Email/password sign-in is not enabled. Please contact support.';
       case 'network-request-failed':
-        return 'Network error. Check your connection.';
+        return 'Network error. Check your internet connection and try again.';
+      case 'invalid-credential':
+        return 'Invalid credentials. Please check your email and try again.';
       default:
         return e.message ?? 'An error occurred. Please try again.';
     }

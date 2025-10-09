@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fresh_fold/Features/auth/view/sigin.dart';
 import 'package:fresh_fold/Features/auth/view/sign_up.dart';
 import 'package:fresh_fold/Features/legal_info/privacy_policy/view/ui.dart';
+import 'package:fresh_fold/Features/price_list/view/ui.dart';
 import '../../Features/auth/view/mobile_verification.dart';
 import '../../Features/auth/view/otp_verification.dart';
 import '../../Features/auth/view/registration.dart';
@@ -48,7 +49,8 @@ class Routes {
     case PPages.notificationPageUi:
         return MaterialPageRoute(builder: (context) => NotificationScreen());
 
-
+ case PPages.priceListPageUi:
+        return MaterialPageRoute(builder: (context) => PriceListScreen());
 
 
 

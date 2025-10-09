@@ -181,6 +181,7 @@ class LoginScreen extends StatelessWidget {
 
   void _showForgotPasswordDialog(BuildContext context, AuthViewModel provider) {
     final emailController = TextEditingController();
+    bool isSending = false;
 
     showDialog(
       context: context,
@@ -212,36 +213,79 @@ class LoginScreen extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
               child: Text("Cancel", style: TextStyle(color: Colors.white)),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final success = await provider.sendPasswordResetEmail(
-                  emailController.text,
-                );
-                Navigator.pop(context);
+            StatefulBuilder(
+              builder: (context, setState) {
+                return ElevatedButton(
+                  onPressed: isSending ? null : () async {
+                    if (emailController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Please enter your email address'),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                      return;
+                    }
 
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Password reset email sent!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to send password reset email'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+                    setState(() {
+                      isSending = true;
+                    });
+
+                    final success = await provider.sendPasswordResetEmail(
+                      emailController.text,
+                    );
+                    
+                    setState(() {
+                      isSending = false;
+                    });
+
+                    if (success) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Password reset email sent! Check your inbox.'),
+                          backgroundColor: Colors.green,
+                          duration: Duration(seconds: 4),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(provider.errorMessage ?? 'Failed to send password reset email'),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 4),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isSending ? Colors.grey : PColors.primaryColor,
+                  ),
+                  child: isSending 
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            "Sending...",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        "Send Reset Link",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: PColors.primaryColor,
-              ),
-              child: Text(
-                "Send Reset Link",
-                style: TextStyle(color: Colors.white),
-              ),
             ),
           ],
         );

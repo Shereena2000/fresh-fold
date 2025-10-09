@@ -62,6 +62,8 @@ class RegistrationScreen extends StatelessWidget {
                       prefixIcon: Icon(Icons.email),
                       hintText: "Email",
                       textHead: "Email",
+                      readOnly: true
+                      ,
                       controller: viewModel.emailController,
                       keyboardType: TextInputType.emailAddress,
                     ),
