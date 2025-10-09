@@ -1,7 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:fresh_fold/Settings/utils/images.dart';
 import 'package:fresh_fold/Settings/utils/p_pages.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -12,6 +11,8 @@ import '../../../Settings/utils/p_colors.dart';
 import '../../notification/view_model/notification_view_model.dart';
 import '../../notification/service/notification_listener_service.dart';
 import '../../auth/view_model.dart/auth_view_model.dart';
+import '../view_model/home_view_model.dart';
+import '../../promo/model/promo_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,22 +23,23 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
   final NotificationListenerService _notificationListener = NotificationListenerService();
-
-  final List<String> promos = [Images.promo_1, Images.promo_2, Images.promo_3];
   final String supportPhoneNumber = '+1234567890';
   
   @override
   void initState() {
     super.initState();
-    _startAutoScroll();
     
-    // Start listening for schedule status changes
+    // Start listening for schedule status changes and load promos
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupNotificationListener();
+      _loadPromos();
     });
+  }
+
+  void _loadPromos() {
+    final homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
+    homeViewModel.loadPromos();
   }
 
   void _setupNotificationListener() {
@@ -48,20 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
       print('🎯 Setting up notification listener for user: $userId');
       _notificationListener.startListening(userId);
     }
-  }
-
-  void _startAutoScroll() {
-    Future.delayed(Duration(seconds: 3), () {
-      if (mounted && _pageController.hasClients) {
-        int nextPage = (_currentPage + 1) % promos.length;
-        _pageController.animateToPage(
-          nextPage,
-          duration: Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-        _startAutoScroll();
-      }
-    });
   }
  // Method to make phone call
   Future<void> _makePhoneCall() async {
@@ -97,11 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -150,38 +133,78 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              CarouselSlider(
-                options: CarouselOptions(
-                  height: 180,
-                  autoPlay: true,
-                  enlargeCenterPage: true,
-                  viewportFraction: 0.85,
-                  aspectRatio: 16 / 9,
-                  autoPlayInterval: Duration(seconds: 3),
-                  autoPlayAnimationDuration: Duration(milliseconds: 600),
-                  onPageChanged: (index, reason) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                ),
-                items: promos.map((promo) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return _buildPromoCard(promo);
-                    },
-                  );
-                }).toList(),
-              ),
+              // Promo Carousel
+              Consumer<HomeViewModel>(
+                builder: (context, homeViewModel, child) {
+                  if (homeViewModel.isLoadingPromos) {
+                    return Container(
+                      height: 180,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: PColors.primaryColor,
+                        ),
+                      ),
+                    );
+                  }
 
-              // Page Indicator
-              SizeBoxH(12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  promos.length,
-                  (index) => _buildIndicator(index == _currentPage),
-                ),
+                  if (homeViewModel.promos.isEmpty) {
+                    return Container(
+                      height: 180,
+                      margin: EdgeInsets.symmetric(horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: PColors.lightGray,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'No promos available',
+                          style: TextStyle(
+                            color: PColors.darkGray,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      CarouselSlider(
+                        options: CarouselOptions(
+                          height: 180,
+                          autoPlay: true,
+                          enlargeCenterPage: true,
+                          viewportFraction: 0.85,
+                          aspectRatio: 16 / 9,
+                          autoPlayInterval: Duration(seconds: 3),
+                          autoPlayAnimationDuration: Duration(milliseconds: 600),
+                          onPageChanged: (index, reason) {
+                            homeViewModel.updateCurrentPromoPage(index);
+                          },
+                        ),
+                        items: homeViewModel.promos.map((promo) {
+                          return Builder(
+                            builder: (BuildContext context) {
+                              return _buildPromoCard(promo);
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      
+                      // Page Indicator
+                      SizeBoxH(12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          homeViewModel.promos.length,
+                          (index) => _buildIndicator(
+                            index == homeViewModel.currentPromoPage
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
 
               SizeBoxH(24),
@@ -320,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPromoCard(String promo) {
+  Widget _buildPromoCard(PromoModel promo) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -335,9 +358,33 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child: Image.asset(
-          promo,
+        child: Image.network(
+          promo.imageUrl,
           fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+                color: PColors.primaryColor,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: PColors.lightGray,
+              child: Center(
+                child: Icon(
+                  Icons.image_not_supported,
+                  color: PColors.darkGray,
+                  size: 50,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
