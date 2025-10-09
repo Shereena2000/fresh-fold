@@ -141,10 +141,11 @@ class OrderViewModel extends ChangeNotifier {
         (schedule) => schedule.scheduleId == scheduleId,
       );
 
-      // Create updated schedule
+      // Create updated schedule with status reset to pending
       ScheduleModel updatedSchedule = existingSchedule.copyWith(
         pickupDate: newDate,
         timeSlot: newTimeSlot,
+        status: 'pending',  // Reset status to pending when rescheduled
         updatedAt: DateTime.now(),
       );
 
