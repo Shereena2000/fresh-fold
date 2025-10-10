@@ -47,7 +47,7 @@ class RegistrationScreen extends StatelessWidget {
                     // ),
                     // SizeBoxH(18),
                     
-                    
+                
                     
                     CustomTextFeild(
                       prefixfn: () {},
